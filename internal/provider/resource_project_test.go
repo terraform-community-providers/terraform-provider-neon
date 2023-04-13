@@ -34,7 +34,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
 				),
 			},
-			// // ImportState testing
+			// ImportState testing
 			{
 				ResourceName:      "neon_project.test",
 				ImportState:       true,
@@ -57,7 +57,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
 				),
 			},
-			// // Update and Read testing
+			// Update and Read testing
 			{
 				Config: testAccProjectResourceConfigDefaultUpdate("nue-todo-app"),
 				Check: resource.ComposeAggregateTestCheckFunc(

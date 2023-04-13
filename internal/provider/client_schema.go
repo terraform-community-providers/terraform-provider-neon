@@ -41,6 +41,15 @@ type Endpoint struct {
 	CurrentState          string  `json:"current_state"`
 }
 
+type Operation struct {
+	Id         string `json:"id"`
+	Action     string `json:"action"`
+	Status     string `json:"status"`
+	EndpointId string `json:"endpoint_id"`
+	BranchId   string `json:"branch_id"`
+	ProjectId  string `json:"project_id"`
+}
+
 type ProjectOutput struct {
 	Project Project `json:"project"`
 }
@@ -110,4 +119,8 @@ type EndpointUpdateInputEndpoint struct {
 
 type EndpointUpdateInput struct {
 	Endpoint EndpointUpdateInputEndpoint `json:"endpoint"`
+}
+
+type OperationListOutput struct {
+	Operations []Operation `json:"operations"`
 }

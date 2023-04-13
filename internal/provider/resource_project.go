@@ -262,7 +262,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 
 	var project ProjectCreateOutput
 
-	err := call(r.client, resp.Diagnostics, http.MethodPost, "/projects", input, &project)
+	err := call(r.client, http.MethodPost, "/projects", input, &project)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to create project, got error: %s", err))
@@ -272,8 +272,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 	tflog.Trace(ctx, "created a project")
 
 	// Delete the default database.
-	url := fmt.Sprintf("/projects/%s/branches/%s/databases/%s", project.Project.Id, project.Branch.Id, project.Databases[0].Name)
-	_, err = delete(r.client, resp.Diagnostics, url)
+	err = databaseDelete(r.client, project.Project.Id, project.Branch.Id, project.Databases[0].Name)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete default database, got error: %s", err))
@@ -281,8 +280,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	// Delete the default role.
-	url = fmt.Sprintf("/projects/%s/branches/%s/roles/%s", project.Project.Id, project.Branch.Id, project.Roles[0].Name)
-	_, err = delete(r.client, resp.Diagnostics, url)
+	err = roleDelete(r.client, project.Project.Id, project.Branch.Id, project.Roles[0].Name)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete default role, got error: %s", err))
@@ -326,7 +324,7 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 	var project ProjectOutput
 
-	err := get(r.client, resp.Diagnostics, fmt.Sprintf("/projects/%s", data.Id.ValueString()), &project)
+	err := get(r.client, fmt.Sprintf("/projects/%s", data.Id.ValueString()), &project)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read project, got error: %s", err))
@@ -334,7 +332,7 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	// Read all branches of the project
-	branches, err := branchList(r.client, resp.Diagnostics, project.Project.Id)
+	branches, err := branchList(r.client, project.Project.Id)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read branches of the project, got error: %s", err))
@@ -347,19 +345,13 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	})
 	branch := branches.Branches[branchIdx]
 
-	// Read all endpoints of the project
-	endpoints, err := endpointList(r.client, resp.Diagnostics, project.Project.Id)
+	// Get the endpoint for the primary branch
+	endpoint, err := branchEndpoint(r.client, project.Project.Id, branch.Id)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read endpoints of the project, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read endpoint of the project, got error: %s", err))
 		return
 	}
-
-	// Get the endpoint for the primary branch
-	endpointIdx := slices.IndexFunc(endpoints.Endpoints, func(endpoint Endpoint) bool {
-		return endpoint.BranchId == branch.Id
-	})
-	endpoint := endpoints.Endpoints[endpointIdx]
 
 	data.Id = types.StringValue(project.Project.Id)
 	data.Name = types.StringValue(project.Project.Name)
@@ -406,7 +398,7 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	var project ProjectOutput
 
-	err := call(r.client, resp.Diagnostics, http.MethodPatch, fmt.Sprintf("/projects/%s", data.Id.ValueString()), input, &project)
+	err := call(r.client, http.MethodPatch, fmt.Sprintf("/projects/%s", data.Id.ValueString()), input, &project)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update project, got error: %s", err))
@@ -427,7 +419,7 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		},
 	}
 
-	branch, err := branchUpdate(r.client, resp.Diagnostics, data.Id.ValueString(), branchData.Id.ValueString(), branchInput)
+	branch, err := branchUpdate(r.client, data.Id.ValueString(), branchData.Id.ValueString(), branchInput)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update branch, got error: %s", err))
@@ -449,7 +441,7 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		},
 	}
 
-	endpoint, err := endpointUpdate(r.client, resp.Diagnostics, data.Id.ValueString(), branchEndpointData.Id.ValueString(), endpointInput)
+	endpoint, err := endpointUpdate(r.client, data.Id.ValueString(), branchEndpointData.Id.ValueString(), endpointInput)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update endpoint, got error: %s", err))
@@ -493,7 +485,7 @@ func (r *ProjectResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	_, err := delete(r.client, resp.Diagnostics, fmt.Sprintf("/projects/%s", data.Id.ValueString()))
+	_, err := delete(r.client, fmt.Sprintf("/projects/%s", data.Id.ValueString()))
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to delete project, got error: %s", err))
