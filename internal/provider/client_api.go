@@ -53,13 +53,7 @@ func branchEndpoint(client *http.Client, projectId string, branchId string) (End
 func branchGet(client *http.Client, projectId string, branchId string) (BranchOutput, error) {
 	var branch BranchOutput
 
-	err := projectWait(client, projectId)
-
-	if err != nil {
-		return branch, err
-	}
-
-	err = get(client, fmt.Sprintf("/projects/%s/branches/%s", projectId, branchId), &branch)
+	err := get(client, fmt.Sprintf("/projects/%s/branches/%s", projectId, branchId), &branch)
 
 	if err != nil {
 		return branch, err
@@ -102,6 +96,36 @@ func endpointUpdate(client *http.Client, projectId string, endpointId string, in
 	return endpoint, err
 }
 
+func databaseCreate(client *http.Client, projectId string, branchId string, input DatabaseCreateInput) (DatabaseOutput, error) {
+	var database DatabaseOutput
+
+	err := projectWait(client, projectId)
+
+	if err != nil {
+		return database, err
+	}
+
+	err = call(client, http.MethodPost, fmt.Sprintf("/projects/%s/branches/%s/databases", projectId, branchId), input, &database)
+
+	return database, err
+}
+
+func databaseUpdate(client *http.Client, projectId string, branchId string, name string, input DatabaseUpdateInput) (DatabaseOutput, error) {
+	var database DatabaseOutput
+
+	err := projectWait(client, projectId)
+
+	if err != nil {
+		return database, err
+	}
+
+	err = call(client, http.MethodPatch, fmt.Sprintf("/projects/%s/branches/%s/databases/%s", projectId, branchId, name), input, &database)
+
+	fmt.Printf("%+v", err)
+
+	return database, err
+}
+
 func databaseDelete(client *http.Client, projectId string, branchId string, name string) error {
 	err := projectWait(client, projectId)
 
@@ -112,6 +136,20 @@ func databaseDelete(client *http.Client, projectId string, branchId string, name
 	_, err = delete(client, fmt.Sprintf("/projects/%s/branches/%s/databases/%s", projectId, branchId, name))
 
 	return err
+}
+
+func roleCreate(client *http.Client, projectId string, branchId string, input RoleCreateInput) (RoleOutput, error) {
+	var role RoleOutput
+
+	err := projectWait(client, projectId)
+
+	if err != nil {
+		return role, err
+	}
+
+	err = call(client, http.MethodPost, fmt.Sprintf("/projects/%s/branches/%s/roles", projectId, branchId), input, &role)
+
+	return role, err
 }
 
 func roleDelete(client *http.Client, projectId string, branchId string, name string) error {

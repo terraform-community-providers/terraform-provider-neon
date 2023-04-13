@@ -92,6 +92,8 @@ func (p *NeonProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 func (p *NeonProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewProjectResource,
+		NewRoleResource,
+		NewDatabaseResource,
 	}
 }
 

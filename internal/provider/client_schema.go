@@ -18,13 +18,13 @@ type Branch struct {
 }
 
 type Role struct {
-	BranchId string `json:"branch_id"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
+	BranchId string `json:"branch_id"`
 }
 
 type Database struct {
-	Id        int    `json:"id"`
+	Id        int64  `json:"id"`
 	BranchId  string `json:"branch_id"`
 	Name      string `json:"name"`
 	OwnerName string `json:"owner_name"`
@@ -123,4 +123,38 @@ type EndpointUpdateInput struct {
 
 type OperationListOutput struct {
 	Operations []Operation `json:"operations"`
+}
+
+type RoleOutput struct {
+	Role Role `json:"role"`
+}
+
+type RoleCreateInputRole struct {
+	Name string `json:"name"`
+}
+
+type RoleCreateInput struct {
+	Role RoleCreateInputRole `json:"role"`
+}
+
+type DatabaseOutput struct {
+	Database Database `json:"database"`
+}
+
+type DatabaseCreateInputDatabase struct {
+	Name      string `json:"name"`
+	OwnerName string `json:"owner_name"`
+}
+
+type DatabaseCreateInput struct {
+	Database DatabaseCreateInputDatabase `json:"database"`
+}
+
+type DatabaseUpdateInputDatabase struct {
+	Name      string `json:"name"`
+	OwnerName string `json:"owner_name"`
+}
+
+type DatabaseUpdateInput struct {
+	Database DatabaseUpdateInputDatabase `json:"database"`
 }
