@@ -121,8 +121,6 @@ func databaseUpdate(client *http.Client, projectId string, branchId string, name
 
 	err = call(client, http.MethodPatch, fmt.Sprintf("/projects/%s/branches/%s/databases/%s", projectId, branchId, name), input, &database)
 
-	fmt.Printf("%+v", err)
-
 	return database, err
 }
 
