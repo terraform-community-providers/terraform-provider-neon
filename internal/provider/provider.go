@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"os"
+	"regexp"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -16,6 +17,10 @@ var (
 	envVarName          = "NEON_TOKEN"
 	errMissingAuthToken = "Required token could not be found. Please set the token using an input variable in the provider configuration block or by using the `" + envVarName + "` environment variable."
 )
+
+func idRegex() *regexp.Regexp {
+	return regexp.MustCompile("^[-0-9a-z]+$")
+}
 
 var _ provider.Provider = &NeonProvider{}
 
@@ -85,7 +90,9 @@ func (p *NeonProvider) Configure(ctx context.Context, req provider.ConfigureRequ
 }
 
 func (p *NeonProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		NewProjectResource,
+	}
 }
 
 func (p *NeonProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
