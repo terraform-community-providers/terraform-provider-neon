@@ -57,6 +57,23 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
 				),
 			},
+			// Update just name
+			{
+				Config: testAccProjectResourceConfigDefault("nu-todo-app"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestMatchResourceAttr("neon_project.test", "id", idRegex()),
+					resource.TestCheckResourceAttr("neon_project.test", "name", "nu-todo-app"),
+					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
+					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
+					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
+					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
+					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.id", idRegex()),
+					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
+				),
+			},
 			// Update and Read testing
 			{
 				Config: testAccProjectResourceConfigDefaultUpdate("nue-todo-app"),

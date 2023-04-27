@@ -331,19 +331,13 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	// Read all branches of the project
-	branches, err := branchList(r.client, project.Project.Id)
+	// Get the primary branch for the project
+	branch, err := readPrimaryBranch(r.client, project.Project.Id)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read branches of the project, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read primary branch of the project, got error: %s", err))
 		return
 	}
-
-	// Get the primary branch
-	branchIdx := slices.IndexFunc(branches.Branches, func(branch Branch) bool {
-		return branch.Primary
-	})
-	branch := branches.Branches[branchIdx]
 
 	// Get the endpoint for the primary branch
 	endpoint, err := branchEndpoint(r.client, project.Project.Id, branch.Id)
@@ -413,20 +407,31 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	branchInput := BranchUpdateInput{
-		Branch: BranchUpdateInputBranch{
-			Name: branchData.Name.ValueString(),
-		},
-	}
-
-	branch, err := branchUpdate(r.client, data.Id.ValueString(), branchData.Id.ValueString(), branchInput)
+	branch, err := readPrimaryBranch(r.client, project.Project.Id)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update branch, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read primary branch of the project, got error: %s", err))
 		return
 	}
 
-	tflog.Trace(ctx, "updated a branch")
+	if branchData.Name.ValueString() != branch.Name {
+		branchInput := BranchUpdateInput{
+			Branch: BranchUpdateInputBranch{
+				Name: branchData.Name.ValueString(),
+			},
+		}
+
+		branchOutput, err := branchUpdate(r.client, data.Id.ValueString(), branchData.Id.ValueString(), branchInput)
+
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update branch, got error: %s", err))
+			return
+		}
+
+		tflog.Trace(ctx, "updated a branch")
+
+		branch = branchOutput.Branch
+	}
 
 	resp.Diagnostics.Append(branchData.Endpoint.As(ctx, &branchEndpointData, basetypes.ObjectAsOptions{})...)
 
@@ -459,8 +464,8 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
 		map[string]attr.Value{
-			"id":   types.StringValue(branch.Branch.Id),
-			"name": types.StringValue(branch.Branch.Name),
+			"id":   types.StringValue(branch.Id),
+			"name": types.StringValue(branch.Name),
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
@@ -497,4 +502,22 @@ func (r *ProjectResource) Delete(ctx context.Context, req resource.DeleteRequest
 
 func (r *ProjectResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func readPrimaryBranch(client *http.Client, projectId string) (Branch, error) {
+	var branch Branch
+
+	// Read all branches
+	branches, err := branchList(client, projectId)
+
+	if err != nil {
+		return branch, err
+	}
+
+	// Get the primary branch
+	branchIdx := slices.IndexFunc(branches.Branches, func(branch Branch) bool {
+		return branch.Primary
+	})
+
+	return branches.Branches[branchIdx], nil
 }
