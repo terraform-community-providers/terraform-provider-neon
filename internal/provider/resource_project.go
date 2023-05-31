@@ -36,17 +36,19 @@ type ProjectResource struct {
 }
 
 type ProjectResourceBranchEndpointModel struct {
-	Id    types.String  `tfsdk:"id"`
-	Host  types.String  `tfsdk:"host"`
-	MinCu types.Float64 `tfsdk:"min_cu"`
-	MaxCu types.Float64 `tfsdk:"max_cu"`
+	Id          types.String  `tfsdk:"id"`
+	Host        types.String  `tfsdk:"host"`
+	MinCu       types.Float64 `tfsdk:"min_cu"`
+	MaxCu       types.Float64 `tfsdk:"max_cu"`
+	Provisioner types.String  `tfsdk:"provisioner"`
 }
 
 var branchEndpointAttrTypes = map[string]attr.Type{
-	"id":     types.StringType,
-	"host":   types.StringType,
-	"min_cu": types.Float64Type,
-	"max_cu": types.Float64Type,
+	"id":          types.StringType,
+	"host":        types.StringType,
+	"min_cu":      types.Float64Type,
+	"max_cu":      types.Float64Type,
+	"provisioner": types.StringType,
 }
 
 type ProjectResourceBranchModel struct {
@@ -193,6 +195,10 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 									float64validator.OneOf(0.25, 0.5, 1, 2, 3, 4, 5, 6, 7),
 								},
 							},
+							"provisioner": schema.StringAttribute{
+								MarkdownDescription: "Provisioner of the endpoint.",
+								Computed:            true,
+							},
 						},
 					},
 				},
@@ -260,6 +266,12 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 	input.Project.AutoscalingLimitMinCu = branchEndpointData.MinCu.ValueFloat64()
 	input.Project.AutoscalingLimitMaxCu = branchEndpointData.MaxCu.ValueFloat64()
 
+	if input.Project.AutoscalingLimitMinCu == input.Project.AutoscalingLimitMaxCu {
+		input.Project.Provisioner = "k8s-pod"
+	} else {
+		input.Project.Provisioner = "k8s-neonvm"
+	}
+
 	var project ProjectCreateOutput
 
 	err := call(r.client, http.MethodPost, "/projects", input, &project)
@@ -301,10 +313,11 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
-					"id":     types.StringValue(project.Endpoints[0].Id),
-					"host":   types.StringValue(project.Endpoints[0].Host),
-					"min_cu": types.Float64Value(project.Endpoints[0].AutoscalingLimitMinCu),
-					"max_cu": types.Float64Value(project.Endpoints[0].AutoscalingLimitMaxCu),
+					"id":          types.StringValue(project.Endpoints[0].Id),
+					"host":        types.StringValue(project.Endpoints[0].Host),
+					"min_cu":      types.Float64Value(project.Endpoints[0].AutoscalingLimitMinCu),
+					"max_cu":      types.Float64Value(project.Endpoints[0].AutoscalingLimitMaxCu),
+					"provisioner": types.StringValue(project.Endpoints[0].Provisioner),
 				},
 			),
 		},
@@ -361,10 +374,11 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
-					"id":     types.StringValue(endpoint.Id),
-					"host":   types.StringValue(endpoint.Host),
-					"min_cu": types.Float64Value(endpoint.AutoscalingLimitMinCu),
-					"max_cu": types.Float64Value(endpoint.AutoscalingLimitMaxCu),
+					"id":          types.StringValue(endpoint.Id),
+					"host":        types.StringValue(endpoint.Host),
+					"min_cu":      types.Float64Value(endpoint.AutoscalingLimitMinCu),
+					"max_cu":      types.Float64Value(endpoint.AutoscalingLimitMaxCu),
+					"provisioner": types.StringValue(endpoint.Provisioner),
 				},
 			),
 		},
@@ -446,6 +460,12 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		},
 	}
 
+	if endpointInput.Endpoint.AutoscalingLimitMinCu == endpointInput.Endpoint.AutoscalingLimitMaxCu {
+		endpointInput.Endpoint.Provisioner = "k8s-pod"
+	} else {
+		endpointInput.Endpoint.Provisioner = "k8s-neonvm"
+	}
+
 	endpoint, err := endpointUpdate(r.client, data.Id.ValueString(), branchEndpointData.Id.ValueString(), endpointInput)
 
 	if err != nil {
@@ -469,10 +489,11 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
-					"id":     types.StringValue(endpoint.Endpoint.Id),
-					"host":   types.StringValue(endpoint.Endpoint.Host),
-					"min_cu": types.Float64Value(endpoint.Endpoint.AutoscalingLimitMinCu),
-					"max_cu": types.Float64Value(endpoint.Endpoint.AutoscalingLimitMaxCu),
+					"id":          types.StringValue(endpoint.Endpoint.Id),
+					"host":        types.StringValue(endpoint.Endpoint.Host),
+					"min_cu":      types.Float64Value(endpoint.Endpoint.AutoscalingLimitMinCu),
+					"max_cu":      types.Float64Value(endpoint.Endpoint.AutoscalingLimitMaxCu),
+					"provisioner": types.StringValue(endpoint.Endpoint.Provisioner),
 				},
 			),
 		},

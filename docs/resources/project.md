@@ -61,6 +61,7 @@ Read-Only:
 
 - `host` (String) Host of the endpoint.
 - `id` (String) Identifier of the endpoint.
+- `provisioner` (String) Provisioner of the endpoint.
 
 ## Import
 
