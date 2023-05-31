@@ -38,6 +38,7 @@ type Endpoint struct {
 	RegionId              string  `json:"region_id"`
 	AutoscalingLimitMinCu float64 `json:"autoscaling_limit_min_cu"`
 	AutoscalingLimitMaxCu float64 `json:"autoscaling_limit_max_cu"`
+	Provisioner           string  `json:"provisioner"`
 	CurrentState          string  `json:"current_state"`
 }
 
@@ -66,6 +67,7 @@ type ProjectCreateInputProject struct {
 	Branch                ProjectCreateInputProjectBranch `json:"branch"`
 	AutoscalingLimitMinCu float64                         `json:"autoscaling_limit_min_cu"`
 	AutoscalingLimitMaxCu float64                         `json:"autoscaling_limit_max_cu"`
+	Provisioner           string                          `json:"provisioner"`
 }
 
 type ProjectCreateInput struct {
@@ -115,6 +117,7 @@ type EndpointOutput struct {
 type EndpointUpdateInputEndpoint struct {
 	AutoscalingLimitMinCu float64 `json:"autoscaling_limit_min_cu"`
 	AutoscalingLimitMaxCu float64 `json:"autoscaling_limit_max_cu"`
+	Provisioner           string  `json:"provisioner"`
 }
 
 type EndpointUpdateInput struct {

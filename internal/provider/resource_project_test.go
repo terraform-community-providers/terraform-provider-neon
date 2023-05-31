@@ -32,6 +32,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.provisioner", "k8s-pod"),
 				),
 			},
 			// ImportState testing
@@ -55,6 +56,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.provisioner", "k8s-pod"),
 				),
 			},
 			// Update just name
@@ -72,6 +74,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.provisioner", "k8s-pod"),
 				),
 			},
 			// Update and Read testing
@@ -89,6 +92,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "1"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "2"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.provisioner", "k8s-neonvm"),
 				),
 			},
 			// ImportState testing
@@ -122,6 +126,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "1"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "2"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.provisioner", "k8s-neonvm"),
 				),
 			},
 			// ImportState testing
@@ -145,6 +150,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "1"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "2"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.provisioner", "k8s-neonvm"),
 				),
 			},
 			// Update with null values
@@ -162,6 +168,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.provisioner", "k8s-pod"),
 				),
 			},
 			// ImportState testing
