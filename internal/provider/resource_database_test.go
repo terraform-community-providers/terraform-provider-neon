@@ -7,14 +7,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccdDatabaseResourceDefault(t *testing.T) {
+func TestAccDatabaseResourceDefault(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccdDatabaseResourceConfigDefault("todo-app", "default"),
+				Config: testAccDatabaseResourceConfigDefault("todo-app", "default"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestMatchResourceAttr("neon_database.test", "id", idRegex()),
 					resource.TestCheckResourceAttr("neon_database.test", "name", "todo-app"),
@@ -32,7 +32,7 @@ func TestAccdDatabaseResourceDefault(t *testing.T) {
 			},
 			// Update with null values
 			{
-				Config: testAccdDatabaseResourceConfigDefault("todo-app", "default"),
+				Config: testAccDatabaseResourceConfigDefault("todo-app", "default"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestMatchResourceAttr("neon_database.test", "id", idRegex()),
 					resource.TestCheckResourceAttr("neon_database.test", "name", "todo-app"),
@@ -43,7 +43,7 @@ func TestAccdDatabaseResourceDefault(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccdDatabaseResourceConfigDefault("nue-todo-app", "todo-app"),
+				Config: testAccDatabaseResourceConfigDefault("nue-todo-app", "todo-app"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestMatchResourceAttr("neon_database.test", "id", idRegex()),
 					resource.TestCheckResourceAttr("neon_database.test", "name", "nue-todo-app"),
@@ -64,7 +64,7 @@ func TestAccdDatabaseResourceDefault(t *testing.T) {
 	})
 }
 
-func testAccdDatabaseResourceConfigDefault(name string, owner string) string {
+func testAccDatabaseResourceConfigDefault(name string, owner string) string {
 	return fmt.Sprintf(`
 resource "neon_database" "test" {
   name = "%s"
