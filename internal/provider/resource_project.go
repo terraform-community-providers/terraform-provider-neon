@@ -12,15 +12,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/terraform-community-providers/terraform-plugin-framework-utils/modifiers"
 	"golang.org/x/exp/slices"
 )
 
@@ -72,6 +74,50 @@ type ProjectResourceModel struct {
 	RegionId   types.String `tfsdk:"region_id"`
 	PgVersion  types.Int64  `tfsdk:"pg_version"`
 	Branch     types.Object `tfsdk:"branch"`
+}
+
+func ProvisionerCalculator() planmodifier.String {
+	return provisionerCalculatorModifier{}
+}
+
+type provisionerCalculatorModifier struct{}
+
+func (m provisionerCalculatorModifier) Description(_ context.Context) string {
+	return "This will be calculated based on compute units."
+}
+
+func (m provisionerCalculatorModifier) MarkdownDescription(_ context.Context) string {
+	return "This will be calculated based on compute units."
+}
+
+func (m provisionerCalculatorModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+	var data *ProjectResourceModel
+	var branchData *ProjectResourceBranchModel
+	var branchEndpointData *ProjectResourceBranchEndpointModel
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(data.Branch.As(ctx, &branchData, basetypes.ObjectAsOptions{})...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(branchData.Endpoint.As(ctx, &branchEndpointData, basetypes.ObjectAsOptions{})...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if branchEndpointData.MinCu == branchEndpointData.MaxCu {
+		resp.PlanValue = types.StringValue("k8s-pod")
+	} else {
+		resp.PlanValue = types.StringValue("k8s-neonvm")
+	}
 }
 
 func (r *ProjectResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -129,9 +175,25 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 				MarkdownDescription: "Primary branch settings of the project.",
 				Optional:            true,
 				Computed:            true,
-				PlanModifiers: []planmodifier.Object{
-					modifiers.UnknownAttributesOnUnknown(),
-				},
+				Default: objectdefault.StaticValue(
+					types.ObjectValueMust(
+						branchAttrTypes,
+						map[string]attr.Value{
+							"id":   types.StringUnknown(),
+							"name": types.StringValue("main"),
+							"endpoint": types.ObjectValueMust(
+								branchEndpointAttrTypes,
+								map[string]attr.Value{
+									"id":          types.StringUnknown(),
+									"host":        types.StringUnknown(),
+									"min_cu":      types.Float64Value(0.25),
+									"max_cu":      types.Float64Value(0.25),
+									"provisioner": types.StringUnknown(),
+								},
+							),
+						},
+					),
+				),
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						MarkdownDescription: "Identifier of the branch.",
@@ -144,9 +206,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 						MarkdownDescription: "Name of the branch.",
 						Optional:            true,
 						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							modifiers.DefaultString("main"),
-						},
+						Default:             stringdefault.StaticString("main"),
 						Validators: []validator.String{
 							stringvalidator.UTF8LengthAtLeast(1),
 						},
@@ -155,9 +215,18 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 						MarkdownDescription: "Comput endpoint settings of the branch.",
 						Optional:            true,
 						Computed:            true,
-						PlanModifiers: []planmodifier.Object{
-							modifiers.UnknownAttributesOnUnknown(),
-						},
+						Default: objectdefault.StaticValue(
+							types.ObjectValueMust(
+								branchEndpointAttrTypes,
+								map[string]attr.Value{
+									"id":          types.StringUnknown(),
+									"host":        types.StringUnknown(),
+									"min_cu":      types.Float64Value(0.25),
+									"max_cu":      types.Float64Value(0.25),
+									"provisioner": types.StringUnknown(),
+								},
+							),
+						),
 						Attributes: map[string]schema.Attribute{
 							"id": schema.StringAttribute{
 								MarkdownDescription: "Identifier of the endpoint.",
@@ -177,9 +246,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 								MarkdownDescription: "Minimum number of compute units for the endpoint. **Default** `0.25`.",
 								Optional:            true,
 								Computed:            true,
-								PlanModifiers: []planmodifier.Float64{
-									modifiers.DefaultFloat(0.25),
-								},
+								Default:             float64default.StaticFloat64(0.25),
 								Validators: []validator.Float64{
 									float64validator.OneOf(0.25, 0.5, 1, 2, 3, 4, 5, 6, 7),
 								},
@@ -188,9 +255,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 								MarkdownDescription: "Maximum number of compute units for the endpoint. **Default** `0.25`.",
 								Optional:            true,
 								Computed:            true,
-								PlanModifiers: []planmodifier.Float64{
-									modifiers.DefaultFloat(0.25),
-								},
+								Default:             float64default.StaticFloat64(0.25),
 								Validators: []validator.Float64{
 									float64validator.OneOf(0.25, 0.5, 1, 2, 3, 4, 5, 6, 7),
 								},
@@ -198,6 +263,9 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 							"provisioner": schema.StringAttribute{
 								MarkdownDescription: "Provisioner of the endpoint.",
 								Computed:            true,
+								PlanModifiers: []planmodifier.String{
+									ProvisionerCalculator(),
+								},
 							},
 						},
 					},
@@ -265,12 +333,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 
 	input.Project.AutoscalingLimitMinCu = branchEndpointData.MinCu.ValueFloat64()
 	input.Project.AutoscalingLimitMaxCu = branchEndpointData.MaxCu.ValueFloat64()
-
-	if input.Project.AutoscalingLimitMinCu == input.Project.AutoscalingLimitMaxCu {
-		input.Project.Provisioner = "k8s-pod"
-	} else {
-		input.Project.Provisioner = "k8s-neonvm"
-	}
+	input.Project.Provisioner = branchEndpointData.Provisioner.ValueString()
 
 	var project ProjectCreateOutput
 
@@ -457,13 +520,8 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		Endpoint: EndpointUpdateInputEndpoint{
 			AutoscalingLimitMinCu: branchEndpointData.MinCu.ValueFloat64(),
 			AutoscalingLimitMaxCu: branchEndpointData.MaxCu.ValueFloat64(),
+			Provisioner:           branchEndpointData.Provisioner.ValueString(),
 		},
-	}
-
-	if endpointInput.Endpoint.AutoscalingLimitMinCu == endpointInput.Endpoint.AutoscalingLimitMaxCu {
-		endpointInput.Endpoint.Provisioner = "k8s-pod"
-	} else {
-		endpointInput.Endpoint.Provisioner = "k8s-neonvm"
 	}
 
 	endpoint, err := endpointUpdate(r.client, data.Id.ValueString(), branchEndpointData.Id.ValueString(), endpointInput)
