@@ -76,6 +76,50 @@ type ProjectResourceModel struct {
 	Branch     types.Object `tfsdk:"branch"`
 }
 
+func ProvisionerCalculator() planmodifier.String {
+	return provisionerCalculatorModifier{}
+}
+
+type provisionerCalculatorModifier struct{}
+
+func (m provisionerCalculatorModifier) Description(_ context.Context) string {
+	return "This will be calculated based on compute units."
+}
+
+func (m provisionerCalculatorModifier) MarkdownDescription(_ context.Context) string {
+	return "This will be calculated based on compute units."
+}
+
+func (m provisionerCalculatorModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+	var data *ProjectResourceModel
+	var branchData *ProjectResourceBranchModel
+	var branchEndpointData *ProjectResourceBranchEndpointModel
+
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(data.Branch.As(ctx, &branchData, basetypes.ObjectAsOptions{})...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(branchData.Endpoint.As(ctx, &branchEndpointData, basetypes.ObjectAsOptions{})...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if branchEndpointData.MinCu == branchEndpointData.MaxCu {
+		resp.PlanValue = types.StringValue("k8s-pod")
+	} else {
+		resp.PlanValue = types.StringValue("k8s-neonvm")
+	}
+}
+
 func (r *ProjectResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_project"
 }
@@ -219,6 +263,9 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 							"provisioner": schema.StringAttribute{
 								MarkdownDescription: "Provisioner of the endpoint.",
 								Computed:            true,
+								PlanModifiers: []planmodifier.String{
+									ProvisionerCalculator(),
+								},
 							},
 						},
 					},
@@ -286,12 +333,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 
 	input.Project.AutoscalingLimitMinCu = branchEndpointData.MinCu.ValueFloat64()
 	input.Project.AutoscalingLimitMaxCu = branchEndpointData.MaxCu.ValueFloat64()
-
-	if input.Project.AutoscalingLimitMinCu == input.Project.AutoscalingLimitMaxCu {
-		input.Project.Provisioner = "k8s-pod"
-	} else {
-		input.Project.Provisioner = "k8s-neonvm"
-	}
+	input.Project.Provisioner = branchEndpointData.Provisioner.ValueString()
 
 	var project ProjectCreateOutput
 
@@ -478,13 +520,8 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		Endpoint: EndpointUpdateInputEndpoint{
 			AutoscalingLimitMinCu: branchEndpointData.MinCu.ValueFloat64(),
 			AutoscalingLimitMaxCu: branchEndpointData.MaxCu.ValueFloat64(),
+			Provisioner:           branchEndpointData.Provisioner.ValueString(),
 		},
-	}
-
-	if endpointInput.Endpoint.AutoscalingLimitMinCu == endpointInput.Endpoint.AutoscalingLimitMaxCu {
-		endpointInput.Endpoint.Provisioner = "k8s-pod"
-	} else {
-		endpointInput.Endpoint.Provisioner = "k8s-neonvm"
 	}
 
 	endpoint, err := endpointUpdate(r.client, data.Id.ValueString(), branchEndpointData.Id.ValueString(), endpointInput)
