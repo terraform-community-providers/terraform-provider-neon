@@ -12,15 +12,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
-	"github.com/terraform-community-providers/terraform-plugin-framework-utils/modifiers"
 	"golang.org/x/exp/slices"
 )
 
@@ -129,9 +131,25 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 				MarkdownDescription: "Primary branch settings of the project.",
 				Optional:            true,
 				Computed:            true,
-				PlanModifiers: []planmodifier.Object{
-					modifiers.UnknownAttributesOnUnknown(),
-				},
+				Default: objectdefault.StaticValue(
+					types.ObjectValueMust(
+						branchAttrTypes,
+						map[string]attr.Value{
+							"id":   types.StringUnknown(),
+							"name": types.StringValue("main"),
+							"endpoint": types.ObjectValueMust(
+								branchEndpointAttrTypes,
+								map[string]attr.Value{
+									"id":          types.StringUnknown(),
+									"host":        types.StringUnknown(),
+									"min_cu":      types.Float64Value(0.25),
+									"max_cu":      types.Float64Value(0.25),
+									"provisioner": types.StringUnknown(),
+								},
+							),
+						},
+					),
+				),
 				Attributes: map[string]schema.Attribute{
 					"id": schema.StringAttribute{
 						MarkdownDescription: "Identifier of the branch.",
@@ -144,9 +162,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 						MarkdownDescription: "Name of the branch.",
 						Optional:            true,
 						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							modifiers.DefaultString("main"),
-						},
+						Default:             stringdefault.StaticString("main"),
 						Validators: []validator.String{
 							stringvalidator.UTF8LengthAtLeast(1),
 						},
@@ -155,9 +171,18 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 						MarkdownDescription: "Comput endpoint settings of the branch.",
 						Optional:            true,
 						Computed:            true,
-						PlanModifiers: []planmodifier.Object{
-							modifiers.UnknownAttributesOnUnknown(),
-						},
+						Default: objectdefault.StaticValue(
+							types.ObjectValueMust(
+								branchEndpointAttrTypes,
+								map[string]attr.Value{
+									"id":          types.StringUnknown(),
+									"host":        types.StringUnknown(),
+									"min_cu":      types.Float64Value(0.25),
+									"max_cu":      types.Float64Value(0.25),
+									"provisioner": types.StringUnknown(),
+								},
+							),
+						),
 						Attributes: map[string]schema.Attribute{
 							"id": schema.StringAttribute{
 								MarkdownDescription: "Identifier of the endpoint.",
@@ -177,9 +202,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 								MarkdownDescription: "Minimum number of compute units for the endpoint. **Default** `0.25`.",
 								Optional:            true,
 								Computed:            true,
-								PlanModifiers: []planmodifier.Float64{
-									modifiers.DefaultFloat(0.25),
-								},
+								Default:             float64default.StaticFloat64(0.25),
 								Validators: []validator.Float64{
 									float64validator.OneOf(0.25, 0.5, 1, 2, 3, 4, 5, 6, 7),
 								},
@@ -188,9 +211,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 								MarkdownDescription: "Maximum number of compute units for the endpoint. **Default** `0.25`.",
 								Optional:            true,
 								Computed:            true,
-								PlanModifiers: []planmodifier.Float64{
-									modifiers.DefaultFloat(0.25),
-								},
+								Default:             float64default.StaticFloat64(0.25),
 								Validators: []validator.Float64{
 									float64validator.OneOf(0.25, 0.5, 1, 2, 3, 4, 5, 6, 7),
 								},
