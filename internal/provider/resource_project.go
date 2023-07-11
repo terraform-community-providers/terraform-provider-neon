@@ -140,6 +140,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Required:            true,
 				Validators: []validator.String{
 					stringvalidator.UTF8LengthAtLeast(1),
+					stringvalidator.UTF8LengthAtMost(64),
 				},
 			},
 			"platform_id": schema.StringAttribute{
