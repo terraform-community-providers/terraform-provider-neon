@@ -38,19 +38,21 @@ type ProjectResource struct {
 }
 
 type ProjectResourceBranchEndpointModel struct {
-	Id          types.String  `tfsdk:"id"`
-	Host        types.String  `tfsdk:"host"`
-	MinCu       types.Float64 `tfsdk:"min_cu"`
-	MaxCu       types.Float64 `tfsdk:"max_cu"`
-	Provisioner types.String  `tfsdk:"provisioner"`
+	Id             types.String  `tfsdk:"id"`
+	Host           types.String  `tfsdk:"host"`
+	MinCu          types.Float64 `tfsdk:"min_cu"`
+	MaxCu          types.Float64 `tfsdk:"max_cu"`
+	Provisioner    types.String  `tfsdk:"provisioner"`
+	SuspendTimeout types.Int64   `tfsdk:"suspend_timeout"`
 }
 
 var branchEndpointAttrTypes = map[string]attr.Type{
-	"id":          types.StringType,
-	"host":        types.StringType,
-	"min_cu":      types.Float64Type,
-	"max_cu":      types.Float64Type,
-	"provisioner": types.StringType,
+	"id":              types.StringType,
+	"host":            types.StringType,
+	"min_cu":          types.Float64Type,
+	"max_cu":          types.Float64Type,
+	"provisioner":     types.StringType,
+	"suspend_timeout": types.Int64Type,
 }
 
 type ProjectResourceBranchModel struct {
@@ -185,11 +187,12 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 							"endpoint": types.ObjectValueMust(
 								branchEndpointAttrTypes,
 								map[string]attr.Value{
-									"id":          types.StringUnknown(),
-									"host":        types.StringUnknown(),
-									"min_cu":      types.Float64Value(0.25),
-									"max_cu":      types.Float64Value(0.25),
-									"provisioner": types.StringUnknown(),
+									"id":              types.StringUnknown(),
+									"host":            types.StringUnknown(),
+									"min_cu":          types.Float64Value(0.25),
+									"max_cu":          types.Float64Value(0.25),
+									"provisioner":     types.StringUnknown(),
+									"suspend_timeout": types.Int64Value(300),
 								},
 							),
 						},
@@ -220,11 +223,12 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 							types.ObjectValueMust(
 								branchEndpointAttrTypes,
 								map[string]attr.Value{
-									"id":          types.StringUnknown(),
-									"host":        types.StringUnknown(),
-									"min_cu":      types.Float64Value(0.25),
-									"max_cu":      types.Float64Value(0.25),
-									"provisioner": types.StringUnknown(),
+									"id":              types.StringUnknown(),
+									"host":            types.StringUnknown(),
+									"min_cu":          types.Float64Value(0.25),
+									"max_cu":          types.Float64Value(0.25),
+									"provisioner":     types.StringUnknown(),
+									"suspend_timeout": types.Int64Value(300),
 								},
 							),
 						),
@@ -266,6 +270,15 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
 									ProvisionerCalculator(),
+								},
+							},
+							"suspend_timeout": schema.Int64Attribute{
+								MarkdownDescription: "Suspend timeout of the endpoint. **Default** `300`.",
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(300),
+								Validators: []validator.Int64{
+									int64validator.Between(-1, 604800),
 								},
 							},
 						},
@@ -332,9 +345,13 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	input.Project.AutoscalingLimitMinCu = branchEndpointData.MinCu.ValueFloat64()
-	input.Project.AutoscalingLimitMaxCu = branchEndpointData.MaxCu.ValueFloat64()
 	input.Project.Provisioner = branchEndpointData.Provisioner.ValueString()
+
+	input.Project.DefaultEndpointSettings = ProjectCreateInputProjectDefaultEndpointSettings{
+		AutoscalingLimitMinCu: branchEndpointData.MinCu.ValueFloat64(),
+		AutoscalingLimitMaxCu: branchEndpointData.MaxCu.ValueFloat64(),
+		SuspendTimeoutSeconds: branchEndpointData.SuspendTimeout.ValueInt64(),
+	}
 
 	var project ProjectCreateOutput
 
@@ -377,11 +394,12 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
-					"id":          types.StringValue(project.Endpoints[0].Id),
-					"host":        types.StringValue(project.Endpoints[0].Host),
-					"min_cu":      types.Float64Value(project.Endpoints[0].AutoscalingLimitMinCu),
-					"max_cu":      types.Float64Value(project.Endpoints[0].AutoscalingLimitMaxCu),
-					"provisioner": types.StringValue(project.Endpoints[0].Provisioner),
+					"id":              types.StringValue(project.Endpoints[0].Id),
+					"host":            types.StringValue(project.Endpoints[0].Host),
+					"min_cu":          types.Float64Value(project.Endpoints[0].AutoscalingLimitMinCu),
+					"max_cu":          types.Float64Value(project.Endpoints[0].AutoscalingLimitMaxCu),
+					"provisioner":     types.StringValue(project.Endpoints[0].Provisioner),
+					"suspend_timeout": types.Int64Value(project.Endpoints[0].SuspendTimeoutSeconds),
 				},
 			),
 		},
@@ -438,11 +456,12 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
-					"id":          types.StringValue(endpoint.Id),
-					"host":        types.StringValue(endpoint.Host),
-					"min_cu":      types.Float64Value(endpoint.AutoscalingLimitMinCu),
-					"max_cu":      types.Float64Value(endpoint.AutoscalingLimitMaxCu),
-					"provisioner": types.StringValue(endpoint.Provisioner),
+					"id":              types.StringValue(endpoint.Id),
+					"host":            types.StringValue(endpoint.Host),
+					"min_cu":          types.Float64Value(endpoint.AutoscalingLimitMinCu),
+					"max_cu":          types.Float64Value(endpoint.AutoscalingLimitMaxCu),
+					"provisioner":     types.StringValue(endpoint.Provisioner),
+					"suspend_timeout": types.Int64Value(endpoint.SuspendTimeoutSeconds),
 				},
 			),
 		},
@@ -522,6 +541,7 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 			AutoscalingLimitMinCu: branchEndpointData.MinCu.ValueFloat64(),
 			AutoscalingLimitMaxCu: branchEndpointData.MaxCu.ValueFloat64(),
 			Provisioner:           branchEndpointData.Provisioner.ValueString(),
+			SuspendTimeoutSeconds: branchEndpointData.SuspendTimeout.ValueInt64(),
 		},
 	}
 
@@ -548,11 +568,12 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
-					"id":          types.StringValue(endpoint.Endpoint.Id),
-					"host":        types.StringValue(endpoint.Endpoint.Host),
-					"min_cu":      types.Float64Value(endpoint.Endpoint.AutoscalingLimitMinCu),
-					"max_cu":      types.Float64Value(endpoint.Endpoint.AutoscalingLimitMaxCu),
-					"provisioner": types.StringValue(endpoint.Endpoint.Provisioner),
+					"id":              types.StringValue(endpoint.Endpoint.Id),
+					"host":            types.StringValue(endpoint.Endpoint.Host),
+					"min_cu":          types.Float64Value(endpoint.Endpoint.AutoscalingLimitMinCu),
+					"max_cu":          types.Float64Value(endpoint.Endpoint.AutoscalingLimitMaxCu),
+					"provisioner":     types.StringValue(endpoint.Endpoint.Provisioner),
+					"suspend_timeout": types.Int64Value(endpoint.Endpoint.SuspendTimeoutSeconds),
 				},
 			),
 		},

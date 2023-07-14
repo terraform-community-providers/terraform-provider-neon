@@ -39,6 +39,7 @@ type Endpoint struct {
 	AutoscalingLimitMinCu float64 `json:"autoscaling_limit_min_cu"`
 	AutoscalingLimitMaxCu float64 `json:"autoscaling_limit_max_cu"`
 	Provisioner           string  `json:"provisioner"`
+	SuspendTimeoutSeconds int64   `json:"suspend_timeout_seconds"`
 	CurrentState          string  `json:"current_state"`
 }
 
@@ -59,15 +60,20 @@ type ProjectCreateInputProjectBranch struct {
 	Name string `json:"name"`
 }
 
+type ProjectCreateInputProjectDefaultEndpointSettings struct {
+	AutoscalingLimitMinCu float64 `json:"autoscaling_limit_min_cu"`
+	AutoscalingLimitMaxCu float64 `json:"autoscaling_limit_max_cu"`
+	SuspendTimeoutSeconds int64   `json:"suspend_timeout_seconds"`
+}
+
 type ProjectCreateInputProject struct {
-	Name                  string                          `json:"name"`
-	RegionId              string                          `json:"region_id"`
-	PgVersion             int64                           `json:"pg_version"`
-	StorePasswords        bool                            `json:"store_passwords"`
-	Branch                ProjectCreateInputProjectBranch `json:"branch"`
-	AutoscalingLimitMinCu float64                         `json:"autoscaling_limit_min_cu"`
-	AutoscalingLimitMaxCu float64                         `json:"autoscaling_limit_max_cu"`
-	Provisioner           string                          `json:"provisioner"`
+	Name                    string                                           `json:"name"`
+	RegionId                string                                           `json:"region_id"`
+	PgVersion               int64                                            `json:"pg_version"`
+	StorePasswords          bool                                             `json:"store_passwords"`
+	Branch                  ProjectCreateInputProjectBranch                  `json:"branch"`
+	Provisioner             string                                           `json:"provisioner"`
+	DefaultEndpointSettings ProjectCreateInputProjectDefaultEndpointSettings `json:"default_endpoint_settings"`
 }
 
 type ProjectCreateInput struct {
@@ -118,6 +124,7 @@ type EndpointUpdateInputEndpoint struct {
 	AutoscalingLimitMinCu float64 `json:"autoscaling_limit_min_cu"`
 	AutoscalingLimitMaxCu float64 `json:"autoscaling_limit_max_cu"`
 	Provisioner           string  `json:"provisioner"`
+	SuspendTimeoutSeconds int64   `json:"suspend_timeout_seconds"`
 }
 
 type EndpointUpdateInput struct {
