@@ -23,15 +23,15 @@ func TestAccRoleResourceDefault(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("neon_role.test", "name", "sally"),
 					resource.TestMatchResourceAttr("neon_role.test", "password", existRegex()),
-					resource.TestCheckResourceAttr("neon_role.test", "branch_id", "br-billowing-morning-664877"),
-					resource.TestCheckResourceAttr("neon_role.test", "project_id", "rapid-shadow-433566"),
+					resource.TestCheckResourceAttr("neon_role.test", "branch_id", "br-patient-mode-718259"),
+					resource.TestCheckResourceAttr("neon_role.test", "project_id", "polished-snowflake-328957"),
 				),
 			},
 			// ImportState testing
 			{
 				ResourceName:      "neon_role.test",
 				ImportState:       true,
-				ImportStateId:     "rapid-shadow-433566:br-billowing-morning-664877:sally",
+				ImportStateId:     "polished-snowflake-328957:br-patient-mode-718259:sally",
 				ImportStateVerify: true,
 			},
 			// Update with null values
@@ -40,15 +40,15 @@ func TestAccRoleResourceDefault(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("neon_role.test", "name", "sally"),
 					resource.TestCheckResourceAttr("neon_role.test", "password", ""),
-					resource.TestCheckResourceAttr("neon_role.test", "branch_id", "br-billowing-morning-664877"),
-					resource.TestCheckResourceAttr("neon_role.test", "project_id", "rapid-shadow-433566"),
+					resource.TestCheckResourceAttr("neon_role.test", "branch_id", "br-patient-mode-718259"),
+					resource.TestCheckResourceAttr("neon_role.test", "project_id", "polished-snowflake-328957"),
 				),
 			},
 			// ImportState testing
 			{
 				ResourceName:      "neon_role.test",
 				ImportState:       true,
-				ImportStateId:     "rapid-shadow-433566:br-billowing-morning-664877:sally",
+				ImportStateId:     "polished-snowflake-328957:br-patient-mode-718259:sally",
 				ImportStateVerify: true,
 			},
 			// Delete testing automatically occurs in TestCase
@@ -60,8 +60,8 @@ func testAccRoleResourceConfigDefault(name string) string {
 	return fmt.Sprintf(`
 resource "neon_role" "test" {
   name = "%s"
-  branch_id = "br-billowing-morning-664877"
-  project_id = "rapid-shadow-433566"
+  branch_id = "br-patient-mode-718259"
+  project_id = "polished-snowflake-328957"
 }
 `, name)
 }
