@@ -78,21 +78,21 @@ type ProjectResourceModel struct {
 	Branch     types.Object `tfsdk:"branch"`
 }
 
-func ProvisionerCalculator() planmodifier.String {
-	return provisionerCalculatorModifier{}
+func ProjectProvisionerCalculator() planmodifier.String {
+	return projectProvisionerCalculatorModifier{}
 }
 
-type provisionerCalculatorModifier struct{}
+type projectProvisionerCalculatorModifier struct{}
 
-func (m provisionerCalculatorModifier) Description(_ context.Context) string {
+func (m projectProvisionerCalculatorModifier) Description(_ context.Context) string {
 	return "This will be calculated based on compute units."
 }
 
-func (m provisionerCalculatorModifier) MarkdownDescription(_ context.Context) string {
+func (m projectProvisionerCalculatorModifier) MarkdownDescription(_ context.Context) string {
 	return "This will be calculated based on compute units."
 }
 
-func (m provisionerCalculatorModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+func (m projectProvisionerCalculatorModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
 	var data *ProjectResourceModel
 	var branchData *ProjectResourceBranchModel
 	var branchEndpointData *ProjectResourceBranchEndpointModel
@@ -269,7 +269,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 								MarkdownDescription: "Provisioner of the endpoint.",
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									ProvisionerCalculator(),
+									ProjectProvisionerCalculator(),
 								},
 							},
 							"suspend_timeout": schema.Int64Attribute{

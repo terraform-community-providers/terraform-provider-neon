@@ -112,6 +112,20 @@ func branchEndpointList(client *http.Client, projectId string, branchId string) 
 	return endpoints, err
 }
 
+func endpointCreate(client *http.Client, projectId string, input EndpointCreateInput) (EndpointOutput, error) {
+	var endpoint EndpointOutput
+
+	err := projectWait(client, projectId)
+
+	if err != nil {
+		return endpoint, err
+	}
+
+	err = call(client, http.MethodPost, fmt.Sprintf("/projects/%s/endpoints", projectId), input, &endpoint)
+
+	return endpoint, err
+}
+
 func endpointUpdate(client *http.Client, projectId string, endpointId string, input EndpointUpdateInput) (EndpointOutput, error) {
 	var endpoint EndpointOutput
 
@@ -124,6 +138,18 @@ func endpointUpdate(client *http.Client, projectId string, endpointId string, in
 	err = call(client, http.MethodPatch, fmt.Sprintf("/projects/%s/endpoints/%s", projectId, endpointId), input, &endpoint)
 
 	return endpoint, err
+}
+
+func endpointDelete(client *http.Client, projectId string, endpointId string) error {
+	err := projectWait(client, projectId)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = delete(client, fmt.Sprintf("/projects/%s/endpoints/%s", projectId, endpointId))
+
+	return err
 }
 
 func databaseCreate(client *http.Client, projectId string, branchId string, input DatabaseCreateInput) (DatabaseOutput, error) {

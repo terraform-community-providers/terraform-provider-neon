@@ -131,6 +131,19 @@ type EndpointOutput struct {
 	Endpoint Endpoint `json:"endpoint"`
 }
 
+type EndpointCreateInputEndpoint struct {
+	BranchId              string  `json:"branch_id"`
+	Type                  string  `json:"type"`
+	AutoscalingLimitMinCu float64 `json:"autoscaling_limit_min_cu"`
+	AutoscalingLimitMaxCu float64 `json:"autoscaling_limit_max_cu"`
+	Provisioner           string  `json:"provisioner"`
+	SuspendTimeoutSeconds int64   `json:"suspend_timeout_seconds"`
+}
+
+type EndpointCreateInput struct {
+	Endpoint EndpointCreateInputEndpoint `json:"endpoint"`
+}
+
 type EndpointUpdateInputEndpoint struct {
 	AutoscalingLimitMinCu float64 `json:"autoscaling_limit_min_cu"`
 	AutoscalingLimitMaxCu float64 `json:"autoscaling_limit_max_cu"`
