@@ -10,11 +10,12 @@ type Project struct {
 }
 
 type Branch struct {
-	Id           string `json:"id"`
-	ProjectId    string `json:"project_id"`
-	Name         string `json:"name"`
-	Primary      bool   `json:"primary"`
-	CurrentState string `json:"current_state"`
+	Id           string  `json:"id"`
+	ProjectId    string  `json:"project_id"`
+	ParentId     *string `json:"parent_id"`
+	Name         string  `json:"name"`
+	Primary      bool    `json:"primary"`
+	CurrentState string  `json:"current_state"`
 }
 
 type Role struct {
@@ -40,6 +41,7 @@ type Endpoint struct {
 	AutoscalingLimitMaxCu float64 `json:"autoscaling_limit_max_cu"`
 	Provisioner           string  `json:"provisioner"`
 	SuspendTimeoutSeconds int64   `json:"suspend_timeout_seconds"`
+	Type                  string  `json:"type"`
 	CurrentState          string  `json:"current_state"`
 }
 
@@ -104,6 +106,15 @@ type BranchOutput struct {
 	Branch Branch `json:"branch"`
 }
 
+type BranchCreateInputBranch struct {
+	Name     string `json:"name"`
+	ParentId string `json:"parent_id,omitempty"`
+}
+
+type BranchCreateInput struct {
+	Branch BranchCreateInputBranch `json:"branch"`
+}
+
 type BranchUpdateInputBranch struct {
 	Name string `json:"name"`
 }
@@ -112,7 +123,7 @@ type BranchUpdateInput struct {
 	Branch BranchUpdateInputBranch `json:"branch"`
 }
 
-type EndpointListOutput struct {
+type BranchEndpointListOutput struct {
 	Endpoints []Endpoint `json:"endpoints"`
 }
 

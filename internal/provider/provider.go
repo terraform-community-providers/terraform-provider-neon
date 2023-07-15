@@ -94,6 +94,7 @@ func (p *NeonProvider) Resources(ctx context.Context) []func() resource.Resource
 		NewProjectResource,
 		NewRoleResource,
 		NewDatabaseResource,
+		NewBranchResource,
 	}
 }
 

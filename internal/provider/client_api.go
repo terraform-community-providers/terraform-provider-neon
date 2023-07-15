@@ -35,7 +35,7 @@ func branchList(client *http.Client, projectId string) (BranchListOutput, error)
 }
 
 func branchEndpoint(client *http.Client, projectId string, branchId string) (Endpoint, error) {
-	endpoints, err := endpointList(client, projectId)
+	endpoints, err := branchEndpointList(client, projectId, branchId)
 
 	var endpoint Endpoint
 
@@ -44,8 +44,12 @@ func branchEndpoint(client *http.Client, projectId string, branchId string) (End
 	}
 
 	endpointIdx := slices.IndexFunc(endpoints.Endpoints, func(endpoint Endpoint) bool {
-		return endpoint.BranchId == branchId
+		return endpoint.Type == "read_write"
 	})
+
+	if endpointIdx == -1 {
+		return endpoint, fmt.Errorf("no read_write endpoint found for branch %s", branchId)
+	}
 
 	return endpoints.Endpoints[endpointIdx], nil
 }
@@ -66,6 +70,20 @@ func branchGet(client *http.Client, projectId string, branchId string) (BranchOu
 	return branch, nil
 }
 
+func branchCreate(client *http.Client, projectId string, input BranchCreateInput) (BranchOutput, error) {
+	var branch BranchOutput
+
+	err := projectWait(client, projectId)
+
+	if err != nil {
+		return branch, err
+	}
+
+	err = call(client, http.MethodPost, fmt.Sprintf("/projects/%s/branches", projectId), input, &branch)
+
+	return branch, err
+}
+
 func branchUpdate(client *http.Client, projectId string, branchId string, input BranchUpdateInput) (BranchOutput, error) {
 	var branch BranchOutput
 
@@ -74,10 +92,22 @@ func branchUpdate(client *http.Client, projectId string, branchId string, input 
 	return branch, err
 }
 
-func endpointList(client *http.Client, projectId string) (EndpointListOutput, error) {
-	var endpoints EndpointListOutput
+func branchDelete(client *http.Client, projectId string, branchId string) error {
+	err := projectWait(client, projectId)
 
-	err := get(client, fmt.Sprintf("/projects/%s/endpoints", projectId), &endpoints)
+	if err != nil {
+		return err
+	}
+
+	_, err = delete(client, fmt.Sprintf("/projects/%s/branches/%s", projectId, branchId))
+
+	return err
+}
+
+func branchEndpointList(client *http.Client, projectId string, branchId string) (BranchEndpointListOutput, error) {
+	var endpoints BranchEndpointListOutput
+
+	err := get(client, fmt.Sprintf("/projects/%s/branches/%s/endpoints", projectId, branchId), &endpoints)
 
 	return endpoints, err
 }

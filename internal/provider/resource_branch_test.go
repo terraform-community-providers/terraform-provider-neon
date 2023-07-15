@@ -1,0 +1,136 @@
+package provider
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
+)
+
+func TestAccBranchResourceDefault(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read testing
+			{
+				Config: testAccBranchResourceConfigDefault("analytics"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestMatchResourceAttr("neon_branch.test", "id", idRegex()),
+					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
+					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-patient-mode-718259"),
+					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+				),
+			},
+			// ImportState testing
+			{
+				ResourceName:      "neon_branch.test",
+				ImportState:       true,
+				ImportStateIdFunc: branchImportIdFunc,
+				ImportStateVerify: true,
+			},
+			// Update with null values
+			{
+				Config: testAccBranchResourceConfigDefault("analytics"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestMatchResourceAttr("neon_branch.test", "id", idRegex()),
+					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
+					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-patient-mode-718259"),
+					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+				),
+			},
+			// Update and Read testing
+			{
+				Config: testAccBranchResourceConfigDefault("nue-analytics"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestMatchResourceAttr("neon_branch.test", "id", idRegex()),
+					resource.TestCheckResourceAttr("neon_branch.test", "name", "nue-analytics"),
+					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-patient-mode-718259"),
+					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+				),
+			},
+			// ImportState testing
+			{
+				ResourceName:      "neon_branch.test",
+				ImportState:       true,
+				ImportStateIdFunc: branchImportIdFunc,
+				ImportStateVerify: true,
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccBranchResourceNonDefault(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create and Read testing
+			{
+				Config: testAccBranchResourceConfigNonDefault("analytics"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestMatchResourceAttr("neon_branch.test", "id", idRegex()),
+					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
+					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-aged-band-448480"),
+					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+				),
+			},
+			// ImportState testing
+			{
+				ResourceName:      "neon_branch.test",
+				ImportState:       true,
+				ImportStateIdFunc: branchImportIdFunc,
+				ImportStateVerify: true,
+			},
+			// Update with same values
+			{
+				Config: testAccBranchResourceConfigNonDefault("analytics"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestMatchResourceAttr("neon_branch.test", "id", idRegex()),
+					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
+					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-aged-band-448480"),
+					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+				),
+			},
+			// ImportState testing
+			{
+				ResourceName:      "neon_branch.test",
+				ImportState:       true,
+				ImportStateIdFunc: branchImportIdFunc,
+				ImportStateVerify: true,
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func testAccBranchResourceConfigDefault(name string) string {
+	return fmt.Sprintf(`
+resource "neon_branch" "test" {
+  name = "%s"
+  project_id = "polished-snowflake-328957"
+}
+`, name)
+}
+
+func testAccBranchResourceConfigNonDefault(name string) string {
+	return fmt.Sprintf(`
+resource "neon_branch" "test" {
+  name = "%s"
+  parent_id = "br-aged-band-448480"
+  project_id = "polished-snowflake-328957"
+}
+`, name)
+}
+
+func branchImportIdFunc(state *terraform.State) (string, error) {
+	rawState, ok := state.RootModule().Resources["neon_branch.test"]
+
+	if !ok {
+		return "", fmt.Errorf("Resource Not found")
+	}
+
+	return fmt.Sprintf("%s:%s", rawState.Primary.Attributes["project_id"], rawState.Primary.Attributes["id"]), nil
+}
