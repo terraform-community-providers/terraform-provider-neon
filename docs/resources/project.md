@@ -42,7 +42,7 @@ resource "neon_project" "example" {
 
 Optional:
 
-- `endpoint` (Attributes) Comput endpoint settings of the branch. (see [below for nested schema](#nestedatt--branch--endpoint))
+- `endpoint` (Attributes) Read-write compute endpoint settings of the branch. (see [below for nested schema](#nestedatt--branch--endpoint))
 - `name` (String) Name of the branch.
 
 Read-Only:
@@ -56,12 +56,13 @@ Optional:
 
 - `max_cu` (Number) Maximum number of compute units for the endpoint. **Default** `0.25`.
 - `min_cu` (Number) Minimum number of compute units for the endpoint. **Default** `0.25`.
+- `suspend_timeout` (Number) Suspend timeout of the endpoint. **Default** `300`.
 
 Read-Only:
 
+- `compute_provisioner` (String) Provisioner of the endpoint.
 - `host` (String) Host of the endpoint.
 - `id` (String) Identifier of the endpoint.
-- `provisioner` (String) Provisioner of the endpoint.
 
 ## Import
 

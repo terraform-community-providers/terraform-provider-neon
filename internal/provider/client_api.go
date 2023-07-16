@@ -34,8 +34,8 @@ func branchList(client *http.Client, projectId string) (BranchListOutput, error)
 	return branches, err
 }
 
-func branchEndpoint(client *http.Client, projectId string, branchId string) (Endpoint, error) {
-	endpoints, err := endpointList(client, projectId)
+func branchEndpoint(client *http.Client, projectId string, branchId string, throw bool) (Endpoint, error) {
+	endpoints, err := branchEndpointList(client, projectId, branchId)
 
 	var endpoint Endpoint
 
@@ -44,8 +44,16 @@ func branchEndpoint(client *http.Client, projectId string, branchId string) (End
 	}
 
 	endpointIdx := slices.IndexFunc(endpoints.Endpoints, func(endpoint Endpoint) bool {
-		return endpoint.BranchId == branchId
+		return endpoint.Type == "read_write"
 	})
+
+	if endpointIdx == -1 {
+		if throw {
+			err = fmt.Errorf("no read_write endpoint found for branch %s", branchId)
+		}
+
+		return endpoint, err
+	}
 
 	return endpoints.Endpoints[endpointIdx], nil
 }
@@ -66,6 +74,20 @@ func branchGet(client *http.Client, projectId string, branchId string) (BranchOu
 	return branch, nil
 }
 
+func branchCreate(client *http.Client, projectId string, input BranchCreateInput) (BranchOutput, error) {
+	var branch BranchOutput
+
+	err := projectWait(client, projectId)
+
+	if err != nil {
+		return branch, err
+	}
+
+	err = call(client, http.MethodPost, fmt.Sprintf("/projects/%s/branches", projectId), input, &branch)
+
+	return branch, err
+}
+
 func branchUpdate(client *http.Client, projectId string, branchId string, input BranchUpdateInput) (BranchOutput, error) {
 	var branch BranchOutput
 
@@ -74,12 +96,38 @@ func branchUpdate(client *http.Client, projectId string, branchId string, input 
 	return branch, err
 }
 
-func endpointList(client *http.Client, projectId string) (EndpointListOutput, error) {
-	var endpoints EndpointListOutput
+func branchDelete(client *http.Client, projectId string, branchId string) error {
+	err := projectWait(client, projectId)
 
-	err := get(client, fmt.Sprintf("/projects/%s/endpoints", projectId), &endpoints)
+	if err != nil {
+		return err
+	}
+
+	_, err = delete(client, fmt.Sprintf("/projects/%s/branches/%s", projectId, branchId))
+
+	return err
+}
+
+func branchEndpointList(client *http.Client, projectId string, branchId string) (BranchEndpointListOutput, error) {
+	var endpoints BranchEndpointListOutput
+
+	err := get(client, fmt.Sprintf("/projects/%s/branches/%s/endpoints", projectId, branchId), &endpoints)
 
 	return endpoints, err
+}
+
+func endpointCreate(client *http.Client, projectId string, input EndpointCreateInput) (EndpointOutput, error) {
+	var endpoint EndpointOutput
+
+	err := projectWait(client, projectId)
+
+	if err != nil {
+		return endpoint, err
+	}
+
+	err = call(client, http.MethodPost, fmt.Sprintf("/projects/%s/endpoints", projectId), input, &endpoint)
+
+	return endpoint, err
 }
 
 func endpointUpdate(client *http.Client, projectId string, endpointId string, input EndpointUpdateInput) (EndpointOutput, error) {
@@ -94,6 +142,18 @@ func endpointUpdate(client *http.Client, projectId string, endpointId string, in
 	err = call(client, http.MethodPatch, fmt.Sprintf("/projects/%s/endpoints/%s", projectId, endpointId), input, &endpoint)
 
 	return endpoint, err
+}
+
+func endpointDelete(client *http.Client, projectId string, endpointId string) error {
+	err := projectWait(client, projectId)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = delete(client, fmt.Sprintf("/projects/%s/endpoints/%s", projectId, endpointId))
+
+	return err
 }
 
 func databaseCreate(client *http.Client, projectId string, branchId string, input DatabaseCreateInput) (DatabaseOutput, error) {

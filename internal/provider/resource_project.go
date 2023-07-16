@@ -38,19 +38,21 @@ type ProjectResource struct {
 }
 
 type ProjectResourceBranchEndpointModel struct {
-	Id          types.String  `tfsdk:"id"`
-	Host        types.String  `tfsdk:"host"`
-	MinCu       types.Float64 `tfsdk:"min_cu"`
-	MaxCu       types.Float64 `tfsdk:"max_cu"`
-	Provisioner types.String  `tfsdk:"provisioner"`
+	Id                 types.String  `tfsdk:"id"`
+	Host               types.String  `tfsdk:"host"`
+	MinCu              types.Float64 `tfsdk:"min_cu"`
+	MaxCu              types.Float64 `tfsdk:"max_cu"`
+	ComputeProvisioner types.String  `tfsdk:"compute_provisioner"`
+	SuspendTimeout     types.Int64   `tfsdk:"suspend_timeout"`
 }
 
 var branchEndpointAttrTypes = map[string]attr.Type{
-	"id":          types.StringType,
-	"host":        types.StringType,
-	"min_cu":      types.Float64Type,
-	"max_cu":      types.Float64Type,
-	"provisioner": types.StringType,
+	"id":                  types.StringType,
+	"host":                types.StringType,
+	"min_cu":              types.Float64Type,
+	"max_cu":              types.Float64Type,
+	"compute_provisioner": types.StringType,
+	"suspend_timeout":     types.Int64Type,
 }
 
 type ProjectResourceBranchModel struct {
@@ -76,21 +78,21 @@ type ProjectResourceModel struct {
 	Branch     types.Object `tfsdk:"branch"`
 }
 
-func ProvisionerCalculator() planmodifier.String {
-	return provisionerCalculatorModifier{}
+func ProjectProvisionerCalculator() planmodifier.String {
+	return projectProvisionerCalculatorModifier{}
 }
 
-type provisionerCalculatorModifier struct{}
+type projectProvisionerCalculatorModifier struct{}
 
-func (m provisionerCalculatorModifier) Description(_ context.Context) string {
+func (m projectProvisionerCalculatorModifier) Description(_ context.Context) string {
 	return "This will be calculated based on compute units."
 }
 
-func (m provisionerCalculatorModifier) MarkdownDescription(_ context.Context) string {
+func (m projectProvisionerCalculatorModifier) MarkdownDescription(_ context.Context) string {
 	return "This will be calculated based on compute units."
 }
 
-func (m provisionerCalculatorModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
+func (m projectProvisionerCalculatorModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
 	var data *ProjectResourceModel
 	var branchData *ProjectResourceBranchModel
 	var branchEndpointData *ProjectResourceBranchEndpointModel
@@ -185,11 +187,12 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 							"endpoint": types.ObjectValueMust(
 								branchEndpointAttrTypes,
 								map[string]attr.Value{
-									"id":          types.StringUnknown(),
-									"host":        types.StringUnknown(),
-									"min_cu":      types.Float64Value(0.25),
-									"max_cu":      types.Float64Value(0.25),
-									"provisioner": types.StringUnknown(),
+									"id":                  types.StringUnknown(),
+									"host":                types.StringUnknown(),
+									"min_cu":              types.Float64Value(0.25),
+									"max_cu":              types.Float64Value(0.25),
+									"compute_provisioner": types.StringUnknown(),
+									"suspend_timeout":     types.Int64Value(300),
 								},
 							),
 						},
@@ -213,18 +216,19 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 						},
 					},
 					"endpoint": schema.SingleNestedAttribute{
-						MarkdownDescription: "Comput endpoint settings of the branch.",
+						MarkdownDescription: "Read-write compute endpoint settings of the branch.",
 						Optional:            true,
 						Computed:            true,
 						Default: objectdefault.StaticValue(
 							types.ObjectValueMust(
 								branchEndpointAttrTypes,
 								map[string]attr.Value{
-									"id":          types.StringUnknown(),
-									"host":        types.StringUnknown(),
-									"min_cu":      types.Float64Value(0.25),
-									"max_cu":      types.Float64Value(0.25),
-									"provisioner": types.StringUnknown(),
+									"id":                  types.StringUnknown(),
+									"host":                types.StringUnknown(),
+									"min_cu":              types.Float64Value(0.25),
+									"max_cu":              types.Float64Value(0.25),
+									"compute_provisioner": types.StringUnknown(),
+									"suspend_timeout":     types.Int64Value(300),
 								},
 							),
 						),
@@ -261,11 +265,20 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 									float64validator.OneOf(0.25, 0.5, 1, 2, 3, 4, 5, 6, 7),
 								},
 							},
-							"provisioner": schema.StringAttribute{
+							"compute_provisioner": schema.StringAttribute{
 								MarkdownDescription: "Provisioner of the endpoint.",
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									ProvisionerCalculator(),
+									ProjectProvisionerCalculator(),
+								},
+							},
+							"suspend_timeout": schema.Int64Attribute{
+								MarkdownDescription: "Suspend timeout of the endpoint. **Default** `300`.",
+								Optional:            true,
+								Computed:            true,
+								Default:             int64default.StaticInt64(300),
+								Validators: []validator.Int64{
+									int64validator.Between(-1, 604800),
 								},
 							},
 						},
@@ -332,9 +345,13 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 
-	input.Project.AutoscalingLimitMinCu = branchEndpointData.MinCu.ValueFloat64()
-	input.Project.AutoscalingLimitMaxCu = branchEndpointData.MaxCu.ValueFloat64()
-	input.Project.Provisioner = branchEndpointData.Provisioner.ValueString()
+	input.Project.ComputeProvisioner = branchEndpointData.ComputeProvisioner.ValueString()
+
+	input.Project.DefaultEndpointSettings = ProjectCreateInputProjectDefaultEndpointSettings{
+		AutoscalingLimitMinCu: branchEndpointData.MinCu.ValueFloat64(),
+		AutoscalingLimitMaxCu: branchEndpointData.MaxCu.ValueFloat64(),
+		SuspendTimeoutSeconds: branchEndpointData.SuspendTimeout.ValueInt64(),
+	}
 
 	var project ProjectCreateOutput
 
@@ -377,11 +394,12 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
-					"id":          types.StringValue(project.Endpoints[0].Id),
-					"host":        types.StringValue(project.Endpoints[0].Host),
-					"min_cu":      types.Float64Value(project.Endpoints[0].AutoscalingLimitMinCu),
-					"max_cu":      types.Float64Value(project.Endpoints[0].AutoscalingLimitMaxCu),
-					"provisioner": types.StringValue(project.Endpoints[0].Provisioner),
+					"id":                  types.StringValue(project.Endpoints[0].Id),
+					"host":                types.StringValue(project.Endpoints[0].Host),
+					"min_cu":              types.Float64Value(project.Endpoints[0].AutoscalingLimitMinCu),
+					"max_cu":              types.Float64Value(project.Endpoints[0].AutoscalingLimitMaxCu),
+					"compute_provisioner": types.StringValue(project.Endpoints[0].ComputeProvisioner),
+					"suspend_timeout":     types.Int64Value(project.Endpoints[0].SuspendTimeoutSeconds),
 				},
 			),
 		},
@@ -417,10 +435,10 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	// Get the endpoint for the primary branch
-	endpoint, err := branchEndpoint(r.client, project.Project.Id, branch.Id)
+	endpoint, err := branchEndpoint(r.client, project.Project.Id, branch.Id, true)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read endpoint of the project, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read endpoint of the primary branch, got error: %s", err))
 		return
 	}
 
@@ -438,11 +456,12 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
-					"id":          types.StringValue(endpoint.Id),
-					"host":        types.StringValue(endpoint.Host),
-					"min_cu":      types.Float64Value(endpoint.AutoscalingLimitMinCu),
-					"max_cu":      types.Float64Value(endpoint.AutoscalingLimitMaxCu),
-					"provisioner": types.StringValue(endpoint.Provisioner),
+					"id":                  types.StringValue(endpoint.Id),
+					"host":                types.StringValue(endpoint.Host),
+					"min_cu":              types.Float64Value(endpoint.AutoscalingLimitMinCu),
+					"max_cu":              types.Float64Value(endpoint.AutoscalingLimitMaxCu),
+					"compute_provisioner": types.StringValue(endpoint.ComputeProvisioner),
+					"suspend_timeout":     types.Int64Value(endpoint.SuspendTimeoutSeconds),
 				},
 			),
 		},
@@ -456,7 +475,16 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 	var branchData *ProjectResourceBranchModel
 	var branchEndpointData *ProjectResourceBranchEndpointModel
 
+	var state *ProjectResourceModel
+	var branchState *ProjectResourceBranchModel
+
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -485,14 +513,19 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	branch, err := readPrimaryBranch(r.client, project.Project.Id)
+	resp.Diagnostics.Append(state.Branch.As(ctx, &branchState, basetypes.ObjectAsOptions{})...)
 
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read primary branch of the project, got error: %s", err))
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if branchData.Name.ValueString() != branch.Name {
+	branch := Branch{
+		Id:   branchState.Id.ValueString(),
+		Name: branchState.Name.ValueString(),
+	}
+
+	// Need to do this check because we can't update the branch with the same name
+	if branchData.Name.ValueString() != branchState.Name.ValueString() {
 		branchInput := BranchUpdateInput{
 			Branch: BranchUpdateInputBranch{
 				Name: branchData.Name.ValueString(),
@@ -521,7 +554,8 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		Endpoint: EndpointUpdateInputEndpoint{
 			AutoscalingLimitMinCu: branchEndpointData.MinCu.ValueFloat64(),
 			AutoscalingLimitMaxCu: branchEndpointData.MaxCu.ValueFloat64(),
-			Provisioner:           branchEndpointData.Provisioner.ValueString(),
+			ComputeProvisioner:    branchEndpointData.ComputeProvisioner.ValueString(),
+			SuspendTimeoutSeconds: branchEndpointData.SuspendTimeout.ValueInt64(),
 		},
 	}
 
@@ -548,11 +582,12 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
-					"id":          types.StringValue(endpoint.Endpoint.Id),
-					"host":        types.StringValue(endpoint.Endpoint.Host),
-					"min_cu":      types.Float64Value(endpoint.Endpoint.AutoscalingLimitMinCu),
-					"max_cu":      types.Float64Value(endpoint.Endpoint.AutoscalingLimitMaxCu),
-					"provisioner": types.StringValue(endpoint.Endpoint.Provisioner),
+					"id":                  types.StringValue(endpoint.Endpoint.Id),
+					"host":                types.StringValue(endpoint.Endpoint.Host),
+					"min_cu":              types.Float64Value(endpoint.Endpoint.AutoscalingLimitMinCu),
+					"max_cu":              types.Float64Value(endpoint.Endpoint.AutoscalingLimitMaxCu),
+					"compute_provisioner": types.StringValue(endpoint.Endpoint.ComputeProvisioner),
+					"suspend_timeout":     types.Int64Value(endpoint.Endpoint.SuspendTimeoutSeconds),
 				},
 			),
 		},
