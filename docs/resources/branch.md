@@ -3,12 +3,12 @@
 page_title: "neon_branch Resource - terraform-provider-neon"
 subcategory: ""
 description: |-
-  Neon branch.
+  Neon branch. Please use neon_project to create primary branch.
 ---
 
 # neon_branch (Resource)
 
-Neon branch.
+Neon branch. Please use `neon_project` to create primary branch.
 
 ## Example Usage
 
@@ -30,11 +30,27 @@ resource "neon_branch" "example" {
 
 ### Optional
 
+- `endpoint` (Attributes) Read-write compute endpoint settings of the branch. (see [below for nested schema](#nestedatt--endpoint))
 - `parent_id` (String) ID of the parent branch. Defaults to the primary branch.
 
 ### Read-Only
 
 - `id` (String) ID of the branch.
+
+<a id="nestedatt--endpoint"></a>
+### Nested Schema for `endpoint`
+
+Optional:
+
+- `max_cu` (Number) Maximum number of compute units for the endpoint. **Default** `0.25`.
+- `min_cu` (Number) Minimum number of compute units for the endpoint. **Default** `0.25`.
+- `suspend_timeout` (Number) Suspend timeout of the endpoint. **Default** `300`.
+
+Read-Only:
+
+- `compute_provisioner` (String) Provisioner of the endpoint.
+- `host` (String) Host of the endpoint.
+- `id` (String) Identifier of the endpoint.
 
 ## Import
 

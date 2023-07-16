@@ -42,7 +42,7 @@ resource "neon_project" "example" {
 
 Optional:
 
-- `endpoint` (Attributes) Comput endpoint settings of the branch. (see [below for nested schema](#nestedatt--branch--endpoint))
+- `endpoint` (Attributes) Read-write compute endpoint settings of the branch. (see [below for nested schema](#nestedatt--branch--endpoint))
 - `name` (String) Name of the branch.
 
 Read-Only:

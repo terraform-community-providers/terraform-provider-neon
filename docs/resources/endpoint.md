@@ -3,12 +3,12 @@
 page_title: "neon_endpoint Resource - terraform-provider-neon"
 subcategory: ""
 description: |-
-  Neon endpoint.
+  Neon endpoint. This creates read_only endpoints. Please use neon_branch to create the read_write endpoint.
 ---
 
 # neon_endpoint (Resource)
 
-Neon endpoint.
+Neon endpoint. This creates `read_only` endpoints. Please use `neon_branch` to create the `read_write` endpoint.
 
 ## Example Usage
 
@@ -35,8 +35,9 @@ resource "neon_endpoint" "example" {
 
 ### Read-Only
 
+- `compute_provisioner` (String) Provisioner of the endpoint.
 - `host` (String) Host of the endpoint.
-- `id` (String) ID of the endpoint.
+- `id` (String) Identifier of the endpoint.
 - `type` (String) Type of the endpoint.
 
 ## Import

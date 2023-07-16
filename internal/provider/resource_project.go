@@ -216,7 +216,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 						},
 					},
 					"endpoint": schema.SingleNestedAttribute{
-						MarkdownDescription: "Comput endpoint settings of the branch.",
+						MarkdownDescription: "Read-write compute endpoint settings of the branch.",
 						Optional:            true,
 						Computed:            true,
 						Default: objectdefault.StaticValue(
@@ -435,10 +435,10 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	// Get the endpoint for the primary branch
-	endpoint, err := branchEndpoint(r.client, project.Project.Id, branch.Id)
+	endpoint, err := branchEndpoint(r.client, project.Project.Id, branch.Id, true)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read endpoint of the project, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read endpoint of the primary branch, got error: %s", err))
 		return
 	}
 
@@ -475,7 +475,16 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 	var branchData *ProjectResourceBranchModel
 	var branchEndpointData *ProjectResourceBranchEndpointModel
 
+	var state *ProjectResourceModel
+	var branchState *ProjectResourceBranchModel
+
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -504,14 +513,19 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
-	branch, err := readPrimaryBranch(r.client, project.Project.Id)
+	resp.Diagnostics.Append(state.Branch.As(ctx, &branchState, basetypes.ObjectAsOptions{})...)
 
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read primary branch of the project, got error: %s", err))
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if branchData.Name.ValueString() != branch.Name {
+	branch := Branch{
+		Id:   branchState.Id.ValueString(),
+		Name: branchState.Name.ValueString(),
+	}
+
+	// Need to do this check because we can't update the branch with the same name
+	if branchData.Name.ValueString() != branchState.Name.ValueString() {
 		branchInput := BranchUpdateInput{
 			Branch: BranchUpdateInputBranch{
 				Name: branchData.Name.ValueString(),

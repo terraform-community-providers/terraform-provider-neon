@@ -34,7 +34,7 @@ func branchList(client *http.Client, projectId string) (BranchListOutput, error)
 	return branches, err
 }
 
-func branchEndpoint(client *http.Client, projectId string, branchId string) (Endpoint, error) {
+func branchEndpoint(client *http.Client, projectId string, branchId string, throw bool) (Endpoint, error) {
 	endpoints, err := branchEndpointList(client, projectId, branchId)
 
 	var endpoint Endpoint
@@ -48,7 +48,11 @@ func branchEndpoint(client *http.Client, projectId string, branchId string) (End
 	})
 
 	if endpointIdx == -1 {
-		return endpoint, fmt.Errorf("no read_write endpoint found for branch %s", branchId)
+		if throw {
+			err = fmt.Errorf("no read_write endpoint found for branch %s", branchId)
+		}
+
+		return endpoint, err
 	}
 
 	return endpoints.Endpoints[endpointIdx], nil

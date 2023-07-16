@@ -80,10 +80,10 @@ func (r *EndpointResource) Metadata(ctx context.Context, req resource.MetadataRe
 
 func (r *EndpointResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Neon endpoint.",
+		MarkdownDescription: "Neon endpoint. This creates `read_only` endpoints. Please use `neon_branch` to create the `read_write` endpoint.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
-				MarkdownDescription: "ID of the endpoint.",
+				MarkdownDescription: "Identifier of the endpoint.",
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),

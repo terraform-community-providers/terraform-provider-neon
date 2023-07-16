@@ -119,7 +119,7 @@ func TestAccEndpointResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_endpoint.test", "suspend_timeout", "3600"),
 				),
 			},
-			// Update and Read testing
+			// Update will null values
 			{
 				Config: testAccEndpointResourceConfigDefault(),
 				Check: resource.ComposeAggregateTestCheckFunc(
