@@ -60,9 +60,9 @@ Optional:
 
 Read-Only:
 
+- `compute_provisioner` (String) Provisioner of the endpoint.
 - `host` (String) Host of the endpoint.
 - `id` (String) Identifier of the endpoint.
-- `provisioner` (String) Provisioner of the endpoint.
 
 ## Import
 

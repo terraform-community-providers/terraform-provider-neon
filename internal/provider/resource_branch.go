@@ -35,12 +35,12 @@ type BranchResource struct {
 }
 
 type BranchResourceEndpointModel struct {
-	Id             types.String  `tfsdk:"id"`
-	Host           types.String  `tfsdk:"host"`
-	MinCu          types.Float64 `tfsdk:"min_cu"`
-	MaxCu          types.Float64 `tfsdk:"max_cu"`
-	Provisioner    types.String  `tfsdk:"compute_provisioner"`
-	SuspendTimeout types.Int64   `tfsdk:"suspend_timeout"`
+	Id                 types.String  `tfsdk:"id"`
+	Host               types.String  `tfsdk:"host"`
+	MinCu              types.Float64 `tfsdk:"min_cu"`
+	MaxCu              types.Float64 `tfsdk:"max_cu"`
+	ComputeProvisioner types.String  `tfsdk:"compute_provisioner"`
+	SuspendTimeout     types.Int64   `tfsdk:"suspend_timeout"`
 }
 
 var endpointAttrTypes = map[string]attr.Type{
@@ -273,7 +273,7 @@ func (r *BranchResource) Create(ctx context.Context, req resource.CreateRequest,
 				Type:                  "read_write",
 				AutoscalingLimitMinCu: endpointData.MinCu.ValueFloat64(),
 				AutoscalingLimitMaxCu: endpointData.MaxCu.ValueFloat64(),
-				Provisioner:           endpointData.Provisioner.ValueString(),
+				ComputeProvisioner:    endpointData.ComputeProvisioner.ValueString(),
 				SuspendTimeoutSeconds: endpointData.SuspendTimeout.ValueInt64(),
 			},
 		}
@@ -294,7 +294,7 @@ func (r *BranchResource) Create(ctx context.Context, req resource.CreateRequest,
 				"host":                types.StringValue(endpoint.Endpoint.Host),
 				"min_cu":              types.Float64Value(endpoint.Endpoint.AutoscalingLimitMinCu),
 				"max_cu":              types.Float64Value(endpoint.Endpoint.AutoscalingLimitMaxCu),
-				"compute_provisioner": types.StringValue(endpoint.Endpoint.Provisioner),
+				"compute_provisioner": types.StringValue(endpoint.Endpoint.ComputeProvisioner),
 				"suspend_timeout":     types.Int64Value(endpoint.Endpoint.SuspendTimeoutSeconds),
 			},
 		)
@@ -348,7 +348,7 @@ func (r *BranchResource) Read(ctx context.Context, req resource.ReadRequest, res
 				"host":                types.StringValue(endpoint.Host),
 				"min_cu":              types.Float64Value(endpoint.AutoscalingLimitMinCu),
 				"max_cu":              types.Float64Value(endpoint.AutoscalingLimitMaxCu),
-				"compute_provisioner": types.StringValue(endpoint.Provisioner),
+				"compute_provisioner": types.StringValue(endpoint.ComputeProvisioner),
 				"suspend_timeout":     types.Int64Value(endpoint.SuspendTimeoutSeconds),
 			},
 		)
@@ -428,7 +428,7 @@ func (r *BranchResource) Update(ctx context.Context, req resource.UpdateRequest,
 				Type:                  "read_write",
 				AutoscalingLimitMinCu: endpointData.MinCu.ValueFloat64(),
 				AutoscalingLimitMaxCu: endpointData.MaxCu.ValueFloat64(),
-				Provisioner:           endpointData.Provisioner.ValueString(),
+				ComputeProvisioner:    endpointData.ComputeProvisioner.ValueString(),
 				SuspendTimeoutSeconds: endpointData.SuspendTimeout.ValueInt64(),
 			},
 		}
@@ -459,7 +459,7 @@ func (r *BranchResource) Update(ctx context.Context, req resource.UpdateRequest,
 			Endpoint: EndpointUpdateInputEndpoint{
 				AutoscalingLimitMinCu: endpointData.MinCu.ValueFloat64(),
 				AutoscalingLimitMaxCu: endpointData.MaxCu.ValueFloat64(),
-				Provisioner:           endpointData.Provisioner.ValueString(),
+				ComputeProvisioner:    endpointData.ComputeProvisioner.ValueString(),
 				SuspendTimeoutSeconds: endpointData.SuspendTimeout.ValueInt64(),
 			},
 		}
@@ -504,7 +504,7 @@ func (r *BranchResource) Update(ctx context.Context, req resource.UpdateRequest,
 				"host":                types.StringValue(endpoint.Host),
 				"min_cu":              types.Float64Value(endpoint.AutoscalingLimitMinCu),
 				"max_cu":              types.Float64Value(endpoint.AutoscalingLimitMaxCu),
-				"compute_provisioner": types.StringValue(endpoint.Provisioner),
+				"compute_provisioner": types.StringValue(endpoint.ComputeProvisioner),
 				"suspend_timeout":     types.Int64Value(endpoint.SuspendTimeoutSeconds),
 			},
 		)

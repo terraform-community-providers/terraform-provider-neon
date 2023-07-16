@@ -33,15 +33,15 @@ type EndpointResource struct {
 }
 
 type EndpointResourceModel struct {
-	Id             types.String  `tfsdk:"id"`
-	BranchId       types.String  `tfsdk:"branch_id"`
-	ProjectId      types.String  `tfsdk:"project_id"`
-	Type           types.String  `tfsdk:"type"`
-	Host           types.String  `tfsdk:"host"`
-	MinCu          types.Float64 `tfsdk:"min_cu"`
-	MaxCu          types.Float64 `tfsdk:"max_cu"`
-	Provisioner    types.String  `tfsdk:"compute_provisioner"`
-	SuspendTimeout types.Int64   `tfsdk:"suspend_timeout"`
+	Id                 types.String  `tfsdk:"id"`
+	BranchId           types.String  `tfsdk:"branch_id"`
+	ProjectId          types.String  `tfsdk:"project_id"`
+	Type               types.String  `tfsdk:"type"`
+	Host               types.String  `tfsdk:"host"`
+	MinCu              types.Float64 `tfsdk:"min_cu"`
+	MaxCu              types.Float64 `tfsdk:"max_cu"`
+	ComputeProvisioner types.String  `tfsdk:"compute_provisioner"`
+	SuspendTimeout     types.Int64   `tfsdk:"suspend_timeout"`
 }
 
 func EndpointProvisionerCalculator() planmodifier.String {
@@ -200,7 +200,7 @@ func (r *EndpointResource) Create(ctx context.Context, req resource.CreateReques
 			Type:                  "read_only",
 			AutoscalingLimitMinCu: data.MinCu.ValueFloat64(),
 			AutoscalingLimitMaxCu: data.MaxCu.ValueFloat64(),
-			Provisioner:           data.Provisioner.ValueString(),
+			ComputeProvisioner:    data.ComputeProvisioner.ValueString(),
 			SuspendTimeoutSeconds: data.SuspendTimeout.ValueInt64(),
 		},
 	}
@@ -221,7 +221,7 @@ func (r *EndpointResource) Create(ctx context.Context, req resource.CreateReques
 	data.Host = types.StringValue(endpoint.Endpoint.Host)
 	data.MinCu = types.Float64Value(endpoint.Endpoint.AutoscalingLimitMinCu)
 	data.MaxCu = types.Float64Value(endpoint.Endpoint.AutoscalingLimitMaxCu)
-	data.Provisioner = types.StringValue(endpoint.Endpoint.Provisioner)
+	data.ComputeProvisioner = types.StringValue(endpoint.Endpoint.ComputeProvisioner)
 	data.SuspendTimeout = types.Int64Value(endpoint.Endpoint.SuspendTimeoutSeconds)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -254,7 +254,7 @@ func (r *EndpointResource) Read(ctx context.Context, req resource.ReadRequest, r
 	data.Host = types.StringValue(endpoint.Endpoint.Host)
 	data.MinCu = types.Float64Value(endpoint.Endpoint.AutoscalingLimitMinCu)
 	data.MaxCu = types.Float64Value(endpoint.Endpoint.AutoscalingLimitMaxCu)
-	data.Provisioner = types.StringValue(endpoint.Endpoint.Provisioner)
+	data.ComputeProvisioner = types.StringValue(endpoint.Endpoint.ComputeProvisioner)
 	data.SuspendTimeout = types.Int64Value(endpoint.Endpoint.SuspendTimeoutSeconds)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
@@ -273,7 +273,7 @@ func (r *EndpointResource) Update(ctx context.Context, req resource.UpdateReques
 		Endpoint: EndpointUpdateInputEndpoint{
 			AutoscalingLimitMinCu: data.MinCu.ValueFloat64(),
 			AutoscalingLimitMaxCu: data.MaxCu.ValueFloat64(),
-			Provisioner:           data.Provisioner.ValueString(),
+			ComputeProvisioner:    data.ComputeProvisioner.ValueString(),
 			SuspendTimeoutSeconds: data.SuspendTimeout.ValueInt64(),
 		},
 	}
@@ -294,7 +294,7 @@ func (r *EndpointResource) Update(ctx context.Context, req resource.UpdateReques
 	data.Host = types.StringValue(endpoint.Endpoint.Host)
 	data.MinCu = types.Float64Value(endpoint.Endpoint.AutoscalingLimitMinCu)
 	data.MaxCu = types.Float64Value(endpoint.Endpoint.AutoscalingLimitMaxCu)
-	data.Provisioner = types.StringValue(endpoint.Endpoint.Provisioner)
+	data.ComputeProvisioner = types.StringValue(endpoint.Endpoint.ComputeProvisioner)
 	data.SuspendTimeout = types.Int64Value(endpoint.Endpoint.SuspendTimeoutSeconds)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
