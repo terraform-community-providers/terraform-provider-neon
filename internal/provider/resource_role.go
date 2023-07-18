@@ -65,9 +65,6 @@ func (r *RoleResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				MarkdownDescription: "Password of the role.",
 				Computed:            true,
 				Sensitive:           true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"branch_id": schema.StringAttribute{
 				MarkdownDescription: "Branch the role belongs to.",
@@ -170,11 +167,21 @@ func (r *RoleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	var role RoleOutput
+	var rolePassword RolePasswordOutput
 
-	err = get(r.client, fmt.Sprintf("/projects/%s/branches/%s/roles/%s", data.ProjectId.ValueString(), data.BranchId.ValueString(), data.Name.ValueString()), &role)
+	roleUrl := fmt.Sprintf("/projects/%s/branches/%s/roles/%s", data.ProjectId.ValueString(), data.BranchId.ValueString(), data.Name.ValueString())
+
+	err = get(r.client, roleUrl, &role)
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read role, got error: %s", err))
+		return
+	}
+
+	err = get(r.client, fmt.Sprintf("%s/reveal_password", roleUrl), &rolePassword)
+
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read role password, got error: %s", err))
 		return
 	}
 
@@ -182,7 +189,7 @@ func (r *RoleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	data.Id = types.StringValue(role.Role.Name)
 	data.Name = types.StringValue(role.Role.Name)
-	data.Password = types.StringValue(role.Role.Password)
+	data.Password = types.StringValue(rolePassword.Password)
 	data.BranchId = types.StringValue(role.Role.BranchId)
 	data.ProjectId = types.StringValue(branch.Branch.ProjectId)
 

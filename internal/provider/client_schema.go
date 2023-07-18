@@ -163,6 +163,10 @@ type RoleOutput struct {
 	Role Role `json:"role"`
 }
 
+type RolePasswordOutput struct {
+	Password string `json:"password"`
+}
+
 type RoleCreateInputRole struct {
 	Name string `json:"name"`
 }

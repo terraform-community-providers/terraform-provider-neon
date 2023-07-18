@@ -39,7 +39,7 @@ func TestAccRoleResourceDefault(t *testing.T) {
 				Config: testAccRoleResourceConfigDefault("sally"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("neon_role.test", "name", "sally"),
-					resource.TestCheckResourceAttr("neon_role.test", "password", ""),
+					resource.TestMatchResourceAttr("neon_role.test", "password", existRegex()),
 					resource.TestCheckResourceAttr("neon_role.test", "branch_id", "br-patient-mode-718259"),
 					resource.TestCheckResourceAttr("neon_role.test", "project_id", "polished-snowflake-328957"),
 				),

@@ -1,3 +1,8 @@
+## 0.1.4
+
+### Bug fixes
+* Fixes issue with password not appearing when reading role
+
 ## 0.1.3
 
 ### Enhancements
