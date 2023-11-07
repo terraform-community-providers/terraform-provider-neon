@@ -163,7 +163,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 				},
 			},
 			"pg_version": schema.Int64Attribute{
-				MarkdownDescription: "PostgreSQL version of the project.",
+				MarkdownDescription: "PostgreSQL version of the project. **Default** `15`.",
 				Computed:            true,
 				Optional:            true,
 				Default:             int64default.StaticInt64(15),
@@ -171,7 +171,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 					int64planmodifier.RequiresReplace(),
 				},
 				Validators: []validator.Int64{
-					int64validator.OneOf(14, 15),
+					int64validator.OneOf(14, 15, 16),
 				},
 			},
 			"branch": schema.SingleNestedAttribute{
