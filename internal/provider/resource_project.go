@@ -171,7 +171,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 					int64planmodifier.RequiresReplace(),
 				},
 				Validators: []validator.Int64{
-					int64validator.OneOf(14, 15),
+					int64validator.OneOf(14, 15, 16),
 				},
 			},
 			"branch": schema.SingleNestedAttribute{
