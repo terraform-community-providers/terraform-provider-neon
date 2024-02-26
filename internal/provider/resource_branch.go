@@ -60,43 +60,6 @@ type BranchResourceModel struct {
 	Endpoint  types.Object `tfsdk:"endpoint"`
 }
 
-func BranchProvisionerCalculator() planmodifier.String {
-	return branchProvisionerCalculatorModifier{}
-}
-
-type branchProvisionerCalculatorModifier struct{}
-
-func (m branchProvisionerCalculatorModifier) Description(_ context.Context) string {
-	return "This will be calculated based on compute units."
-}
-
-func (m branchProvisionerCalculatorModifier) MarkdownDescription(_ context.Context) string {
-	return "This will be calculated based on compute units."
-}
-
-func (m branchProvisionerCalculatorModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
-	var data *BranchResourceModel
-	var endpointData *BranchResourceEndpointModel
-
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	resp.Diagnostics.Append(data.Endpoint.As(ctx, &endpointData, basetypes.ObjectAsOptions{})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if endpointData.MinCu == endpointData.MaxCu {
-		resp.PlanValue = types.StringValue("k8s-pod")
-	} else {
-		resp.PlanValue = types.StringValue("k8s-neonvm")
-	}
-}
-
 func (r *BranchResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_branch"
 }
@@ -179,9 +142,6 @@ func (r *BranchResource) Schema(ctx context.Context, req resource.SchemaRequest,
 					"compute_provisioner": schema.StringAttribute{
 						MarkdownDescription: "Provisioner of the endpoint.",
 						Computed:            true,
-						PlanModifiers: []planmodifier.String{
-							BranchProvisionerCalculator(),
-						},
 					},
 					"suspend_timeout": schema.Int64Attribute{
 						MarkdownDescription: "Suspend timeout of the endpoint. **Default** `300`.",
@@ -273,7 +233,6 @@ func (r *BranchResource) Create(ctx context.Context, req resource.CreateRequest,
 				Type:                  "read_write",
 				AutoscalingLimitMinCu: endpointData.MinCu.ValueFloat64(),
 				AutoscalingLimitMaxCu: endpointData.MaxCu.ValueFloat64(),
-				ComputeProvisioner:    endpointData.ComputeProvisioner.ValueString(),
 				SuspendTimeoutSeconds: endpointData.SuspendTimeout.ValueInt64(),
 			},
 		}
@@ -428,7 +387,6 @@ func (r *BranchResource) Update(ctx context.Context, req resource.UpdateRequest,
 				Type:                  "read_write",
 				AutoscalingLimitMinCu: endpointData.MinCu.ValueFloat64(),
 				AutoscalingLimitMaxCu: endpointData.MaxCu.ValueFloat64(),
-				ComputeProvisioner:    endpointData.ComputeProvisioner.ValueString(),
 				SuspendTimeoutSeconds: endpointData.SuspendTimeout.ValueInt64(),
 			},
 		}
@@ -459,7 +417,6 @@ func (r *BranchResource) Update(ctx context.Context, req resource.UpdateRequest,
 			Endpoint: EndpointUpdateInputEndpoint{
 				AutoscalingLimitMinCu: endpointData.MinCu.ValueFloat64(),
 				AutoscalingLimitMaxCu: endpointData.MaxCu.ValueFloat64(),
-				ComputeProvisioner:    endpointData.ComputeProvisioner.ValueString(),
 				SuspendTimeoutSeconds: endpointData.SuspendTimeout.ValueInt64(),
 			},
 		}

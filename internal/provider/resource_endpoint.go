@@ -44,36 +44,6 @@ type EndpointResourceModel struct {
 	SuspendTimeout     types.Int64   `tfsdk:"suspend_timeout"`
 }
 
-func EndpointProvisionerCalculator() planmodifier.String {
-	return endpointProvisionerCalculatorModifier{}
-}
-
-type endpointProvisionerCalculatorModifier struct{}
-
-func (m endpointProvisionerCalculatorModifier) Description(_ context.Context) string {
-	return "This will be calculated based on compute units."
-}
-
-func (m endpointProvisionerCalculatorModifier) MarkdownDescription(_ context.Context) string {
-	return "This will be calculated based on compute units."
-}
-
-func (m endpointProvisionerCalculatorModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
-	var data *EndpointResourceModel
-
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if data.MinCu == data.MaxCu {
-		resp.PlanValue = types.StringValue("k8s-pod")
-	} else {
-		resp.PlanValue = types.StringValue("k8s-neonvm")
-	}
-}
-
 func (r *EndpointResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_endpoint"
 }
@@ -148,9 +118,6 @@ func (r *EndpointResource) Schema(ctx context.Context, req resource.SchemaReques
 			"compute_provisioner": schema.StringAttribute{
 				MarkdownDescription: "Provisioner of the endpoint.",
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					EndpointProvisionerCalculator(),
-				},
 			},
 			"suspend_timeout": schema.Int64Attribute{
 				MarkdownDescription: "Suspend timeout of the endpoint. **Default** `300`.",
@@ -200,7 +167,6 @@ func (r *EndpointResource) Create(ctx context.Context, req resource.CreateReques
 			Type:                  "read_only",
 			AutoscalingLimitMinCu: data.MinCu.ValueFloat64(),
 			AutoscalingLimitMaxCu: data.MaxCu.ValueFloat64(),
-			ComputeProvisioner:    data.ComputeProvisioner.ValueString(),
 			SuspendTimeoutSeconds: data.SuspendTimeout.ValueInt64(),
 		},
 	}
@@ -273,7 +239,6 @@ func (r *EndpointResource) Update(ctx context.Context, req resource.UpdateReques
 		Endpoint: EndpointUpdateInputEndpoint{
 			AutoscalingLimitMinCu: data.MinCu.ValueFloat64(),
 			AutoscalingLimitMaxCu: data.MaxCu.ValueFloat64(),
-			ComputeProvisioner:    data.ComputeProvisioner.ValueString(),
 			SuspendTimeoutSeconds: data.SuspendTimeout.ValueInt64(),
 		},
 	}
