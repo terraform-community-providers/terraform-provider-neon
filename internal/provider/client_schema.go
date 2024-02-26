@@ -74,7 +74,6 @@ type ProjectCreateInputProject struct {
 	PgVersion               int64                                            `json:"pg_version"`
 	StorePasswords          bool                                             `json:"store_passwords"`
 	Branch                  ProjectCreateInputProjectBranch                  `json:"branch"`
-	ComputeProvisioner      string                                           `json:"provisioner"`
 	DefaultEndpointSettings ProjectCreateInputProjectDefaultEndpointSettings `json:"default_endpoint_settings"`
 }
 
@@ -136,7 +135,6 @@ type EndpointCreateInputEndpoint struct {
 	Type                  string  `json:"type"`
 	AutoscalingLimitMinCu float64 `json:"autoscaling_limit_min_cu"`
 	AutoscalingLimitMaxCu float64 `json:"autoscaling_limit_max_cu"`
-	ComputeProvisioner    string  `json:"provisioner"`
 	SuspendTimeoutSeconds int64   `json:"suspend_timeout_seconds"`
 }
 
@@ -147,7 +145,6 @@ type EndpointCreateInput struct {
 type EndpointUpdateInputEndpoint struct {
 	AutoscalingLimitMinCu float64 `json:"autoscaling_limit_min_cu"`
 	AutoscalingLimitMaxCu float64 `json:"autoscaling_limit_max_cu"`
-	ComputeProvisioner    string  `json:"provisioner"`
 	SuspendTimeoutSeconds int64   `json:"suspend_timeout_seconds"`
 }
 

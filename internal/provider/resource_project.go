@@ -78,50 +78,6 @@ type ProjectResourceModel struct {
 	Branch     types.Object `tfsdk:"branch"`
 }
 
-func ProjectProvisionerCalculator() planmodifier.String {
-	return projectProvisionerCalculatorModifier{}
-}
-
-type projectProvisionerCalculatorModifier struct{}
-
-func (m projectProvisionerCalculatorModifier) Description(_ context.Context) string {
-	return "This will be calculated based on compute units."
-}
-
-func (m projectProvisionerCalculatorModifier) MarkdownDescription(_ context.Context) string {
-	return "This will be calculated based on compute units."
-}
-
-func (m projectProvisionerCalculatorModifier) PlanModifyString(ctx context.Context, req planmodifier.StringRequest, resp *planmodifier.StringResponse) {
-	var data *ProjectResourceModel
-	var branchData *ProjectResourceBranchModel
-	var branchEndpointData *ProjectResourceBranchEndpointModel
-
-	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	resp.Diagnostics.Append(data.Branch.As(ctx, &branchData, basetypes.ObjectAsOptions{})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	resp.Diagnostics.Append(branchData.Endpoint.As(ctx, &branchEndpointData, basetypes.ObjectAsOptions{})...)
-
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if branchEndpointData.MinCu == branchEndpointData.MaxCu {
-		resp.PlanValue = types.StringValue("k8s-pod")
-	} else {
-		resp.PlanValue = types.StringValue("k8s-neonvm")
-	}
-}
-
 func (r *ProjectResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_project"
 }
@@ -191,7 +147,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 									"host":                types.StringUnknown(),
 									"min_cu":              types.Float64Value(0.25),
 									"max_cu":              types.Float64Value(0.25),
-									"compute_provisioner": types.StringUnknown(),
+									"compute_provisioner": types.StringValue("k8s-neonvm"),
 									"suspend_timeout":     types.Int64Value(300),
 								},
 							),
@@ -227,7 +183,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 									"host":                types.StringUnknown(),
 									"min_cu":              types.Float64Value(0.25),
 									"max_cu":              types.Float64Value(0.25),
-									"compute_provisioner": types.StringUnknown(),
+									"compute_provisioner": types.StringValue("k8s-neonvm"),
 									"suspend_timeout":     types.Int64Value(300),
 								},
 							),
@@ -269,7 +225,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 								MarkdownDescription: "Provisioner of the endpoint.",
 								Computed:            true,
 								PlanModifiers: []planmodifier.String{
-									ProjectProvisionerCalculator(),
+									stringplanmodifier.UseStateForUnknown(),
 								},
 							},
 							"suspend_timeout": schema.Int64Attribute{
@@ -344,8 +300,6 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	input.Project.ComputeProvisioner = branchEndpointData.ComputeProvisioner.ValueString()
 
 	input.Project.DefaultEndpointSettings = ProjectCreateInputProjectDefaultEndpointSettings{
 		AutoscalingLimitMinCu: branchEndpointData.MinCu.ValueFloat64(),
@@ -554,7 +508,6 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		Endpoint: EndpointUpdateInputEndpoint{
 			AutoscalingLimitMinCu: branchEndpointData.MinCu.ValueFloat64(),
 			AutoscalingLimitMaxCu: branchEndpointData.MaxCu.ValueFloat64(),
-			ComputeProvisioner:    branchEndpointData.ComputeProvisioner.ValueString(),
 			SuspendTimeoutSeconds: branchEndpointData.SuspendTimeout.ValueInt64(),
 		},
 	}

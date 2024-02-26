@@ -77,7 +77,7 @@ func TestAccBranchResourceDefault(t *testing.T) {
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.max_cu", "0.25"),
-					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.compute_provisioner", "k8s-pod"),
+					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.compute_provisioner", "k8s-neonvm"),
 					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.suspend_timeout", "300"),
 				),
 			},
@@ -100,11 +100,11 @@ func TestAccBranchResourceNonDefault(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccBranchResourceConfigNonDefault("analytics", "br-aged-band-448480"),
+				Config: testAccBranchResourceConfigNonDefault("analytics", "br-proud-heart-a5e356v0"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestMatchResourceAttr("neon_branch.test", "id", idRegex()),
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
-					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-aged-band-448480"),
+					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-proud-heart-a5e356v0"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.host", hostRegex("us-east-2")),
@@ -123,11 +123,11 @@ func TestAccBranchResourceNonDefault(t *testing.T) {
 			},
 			// Update with same values
 			{
-				Config: testAccBranchResourceConfigNonDefault("analytics", "br-aged-band-448480"),
+				Config: testAccBranchResourceConfigNonDefault("analytics", "br-proud-heart-a5e356v0"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestMatchResourceAttr("neon_branch.test", "id", idRegex()),
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
-					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-aged-band-448480"),
+					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-proud-heart-a5e356v0"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.host", hostRegex("us-east-2")),
@@ -146,17 +146,17 @@ func TestAccBranchResourceNonDefault(t *testing.T) {
 			},
 			// Update with default endpoint values
 			{
-				Config: testAccBranchResourceConfigEndpointDefault("nue-analytics", "br-aged-band-448480"),
+				Config: testAccBranchResourceConfigEndpointDefault("nue-analytics", "br-proud-heart-a5e356v0"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestMatchResourceAttr("neon_branch.test", "id", idRegex()),
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "nue-analytics"),
-					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-aged-band-448480"),
+					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-proud-heart-a5e356v0"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.max_cu", "0.25"),
-					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.compute_provisioner", "k8s-pod"),
+					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.compute_provisioner", "k8s-neonvm"),
 					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.suspend_timeout", "300"),
 				),
 			},
@@ -166,7 +166,7 @@ func TestAccBranchResourceNonDefault(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestMatchResourceAttr("neon_branch.test", "id", idRegex()),
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
-					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-aged-band-448480"),
+					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-proud-heart-a5e356v0"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
 					resource.TestCheckNoResourceAttr("neon_branch.test", "endpoint"),
 				),
@@ -196,7 +196,7 @@ func testAccBranchResourceConfigDefaultParent(name string) string {
 	return fmt.Sprintf(`
 resource "neon_branch" "test" {
   name = "%s"
-  parent_id = "br-aged-band-448480"
+  parent_id = "br-proud-heart-a5e356v0"
   project_id = "polished-snowflake-328957"
 }
 `, name)
@@ -222,9 +222,9 @@ resource "neon_branch" "test" {
   project_id = "polished-snowflake-328957"
 
   endpoint = {
-	min_cu = 1
-	max_cu = 2
-	suspend_timeout = 3600
+    min_cu = 1
+    max_cu = 2
+    suspend_timeout = 3600
   }
 }
 `, name, parentId)
