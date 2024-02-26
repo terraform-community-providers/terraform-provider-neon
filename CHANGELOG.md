@@ -1,3 +1,8 @@
+## 0.1.6
+
+### Bug fixes
+* Fixes issue with compute provisioner now defaulting to k8s-neonvm
+
 ## 0.1.5
 
 ### Enhancements
