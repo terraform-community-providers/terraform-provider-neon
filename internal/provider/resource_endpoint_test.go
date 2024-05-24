@@ -25,7 +25,7 @@ func TestAccEndpointResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_endpoint.test", "min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_endpoint.test", "max_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_endpoint.test", "compute_provisioner", "k8s-neonvm"),
-					resource.TestCheckResourceAttr("neon_endpoint.test", "suspend_timeout", "300"),
+					resource.TestCheckResourceAttr("neon_endpoint.test", "suspend_timeout", "0"),
 				),
 			},
 			// ImportState testing
@@ -47,7 +47,7 @@ func TestAccEndpointResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_endpoint.test", "min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_endpoint.test", "max_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_endpoint.test", "compute_provisioner", "k8s-neonvm"),
-					resource.TestCheckResourceAttr("neon_endpoint.test", "suspend_timeout", "300"),
+					resource.TestCheckResourceAttr("neon_endpoint.test", "suspend_timeout", "0"),
 				),
 			},
 			// Update and Read testing
@@ -131,7 +131,7 @@ func TestAccEndpointResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_endpoint.test", "min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_endpoint.test", "max_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_endpoint.test", "compute_provisioner", "k8s-neonvm"),
-					resource.TestCheckResourceAttr("neon_endpoint.test", "suspend_timeout", "300"),
+					resource.TestCheckResourceAttr("neon_endpoint.test", "suspend_timeout", "0"),
 				),
 			},
 			// ImportState testing

@@ -120,10 +120,10 @@ func (r *EndpointResource) Schema(ctx context.Context, req resource.SchemaReques
 				Computed:            true,
 			},
 			"suspend_timeout": schema.Int64Attribute{
-				MarkdownDescription: "Suspend timeout of the endpoint. **Default** `300`.",
+				MarkdownDescription: "Suspend timeout of the endpoint. **Default** `0`.",
 				Optional:            true,
 				Computed:            true,
-				Default:             int64default.StaticInt64(300),
+				Default:             int64default.StaticInt64(0),
 				Validators: []validator.Int64{
 					int64validator.Between(-1, 604800),
 				},

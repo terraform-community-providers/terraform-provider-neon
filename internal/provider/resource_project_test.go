@@ -57,7 +57,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.compute_provisioner", "k8s-neonvm"),
-					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.suspend_timeout", "300"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.suspend_timeout", "0"),
 				),
 			},
 			// Update just name
@@ -76,7 +76,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.compute_provisioner", "k8s-neonvm"),
-					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.suspend_timeout", "300"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.suspend_timeout", "0"),
 				),
 			},
 			// Update and Read testing
@@ -174,7 +174,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.compute_provisioner", "k8s-neonvm"),
-					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.suspend_timeout", "300"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.suspend_timeout", "0"),
 				),
 			},
 			// ImportState testing

@@ -44,7 +44,7 @@ Optional:
 
 - `max_cu` (Number) Maximum number of compute units for the endpoint. **Default** `0.25`.
 - `min_cu` (Number) Minimum number of compute units for the endpoint. **Default** `0.25`.
-- `suspend_timeout` (Number) Suspend timeout of the endpoint. **Default** `300`.
+- `suspend_timeout` (Number) Suspend timeout of the endpoint. **Default** `0`.
 
 Read-Only:
 
