@@ -5,6 +5,7 @@ type Project struct {
 	Name           string `json:"name"`
 	PlatformId     string `json:"platform_id"`
 	RegionId       string `json:"region_id"`
+	OrgId          string `json:"org_id,omitempty"`
 	PgVersion      int64  `json:"pg_version"`
 	StorePasswords bool   `json:"store_passwords"`
 }
@@ -71,6 +72,7 @@ type ProjectCreateInputProjectDefaultEndpointSettings struct {
 type ProjectCreateInputProject struct {
 	Name                    string                                           `json:"name"`
 	RegionId                string                                           `json:"region_id"`
+	OrgId                   *string                                          `json:"org_id,omitempty"`
 	PgVersion               int64                                            `json:"pg_version"`
 	StorePasswords          bool                                             `json:"store_passwords"`
 	Branch                  ProjectCreateInputProjectBranch                  `json:"branch"`

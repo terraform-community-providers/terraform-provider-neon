@@ -30,6 +30,7 @@ resource "neon_project" "example" {
 ### Optional
 
 - `branch` (Attributes) Primary branch settings of the project. (see [below for nested schema](#nestedatt--branch))
+- `org_id` (String) Organization of the project.
 - `pg_version` (Number) PostgreSQL version of the project. **Default** `15`.
 
 ### Read-Only
