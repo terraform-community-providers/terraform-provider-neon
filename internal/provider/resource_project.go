@@ -74,6 +74,7 @@ type ProjectResourceModel struct {
 	Name       types.String `tfsdk:"name"`
 	PlatformId types.String `tfsdk:"platform_id"`
 	RegionId   types.String `tfsdk:"region_id"`
+	OrgId      types.String `tfsdk:"org_id"`
 	PgVersion  types.Int64  `tfsdk:"pg_version"`
 	Branch     types.Object `tfsdk:"branch"`
 }
@@ -116,6 +117,13 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 				},
 				Validators: []validator.String{
 					stringvalidator.UTF8LengthAtLeast(1),
+				},
+			},
+			"org_id": schema.StringAttribute{
+				MarkdownDescription: "Organization of the project.",
+				Optional:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"pg_version": schema.Int64Attribute{
@@ -280,6 +288,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 		Project: ProjectCreateInputProject{
 			Name:           data.Name.ValueString(),
 			RegionId:       data.RegionId.ValueString(),
+			OrgId:          data.OrgId.ValueStringPointer(),
 			PgVersion:      data.PgVersion.ValueInt64(),
 			StorePasswords: true,
 		},
@@ -339,6 +348,10 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 	data.PlatformId = types.StringValue(project.Project.PlatformId)
 	data.RegionId = types.StringValue(project.Project.RegionId)
 	data.PgVersion = types.Int64Value(project.Project.PgVersion)
+
+	if project.Project.OrgId != "" {
+		data.OrgId = types.StringValue(project.Project.OrgId)
+	}
 
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
@@ -401,6 +414,10 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	data.PlatformId = types.StringValue(project.Project.PlatformId)
 	data.RegionId = types.StringValue(project.Project.RegionId)
 	data.PgVersion = types.Int64Value(project.Project.PgVersion)
+
+	if project.Project.OrgId != "" {
+		data.OrgId = types.StringValue(project.Project.OrgId)
+	}
 
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
@@ -526,6 +543,10 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 	data.PlatformId = types.StringValue(project.Project.PlatformId)
 	data.RegionId = types.StringValue(project.Project.RegionId)
 	data.PgVersion = types.Int64Value(project.Project.PgVersion)
+
+	if project.Project.OrgId != "" {
+		data.OrgId = types.StringValue(project.Project.OrgId)
+	}
 
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,

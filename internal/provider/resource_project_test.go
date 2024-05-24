@@ -25,6 +25,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "name", "todo-app"),
 					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
+					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
@@ -33,6 +34,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.compute_provisioner", "k8s-neonvm"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.suspend_timeout", "0"),
 				),
 			},
 			// ImportState testing
@@ -49,6 +51,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "name", "todo-app"),
 					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
+					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
@@ -68,6 +71,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "name", "nu-todo-app"),
 					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
+					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
@@ -87,6 +91,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "name", "nue-todo-app"),
 					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
+					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "master"),
@@ -122,6 +127,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "name", "todo-app"),
 					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
+					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "master"),
@@ -147,6 +153,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "name", "todo-app"),
 					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
+					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "master"),
@@ -166,6 +173,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "name", "nue-todo-app"),
 					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
+					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
@@ -221,6 +229,7 @@ func testAccProjectResourceConfigNonDefault(name string) string {
 resource "neon_project" "test" {
   name = "%s"
   region_id = "aws-us-east-2"
+  org_id = "org-aged-sky-67916740"
 
   pg_version = 14
 
@@ -242,6 +251,7 @@ func testAccProjectResourceConfigNonDefaultUpdate(name string) string {
 resource "neon_project" "test" {
   name = "%s"
   region_id = "aws-us-east-2"
+  org_id = "org-aged-sky-67916740"
 
   pg_version = 14
 }
