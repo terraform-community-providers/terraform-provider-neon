@@ -15,7 +15,7 @@ type Branch struct {
 	ProjectId    string  `json:"project_id"`
 	ParentId     *string `json:"parent_id"`
 	Name         string  `json:"name"`
-	Primary      bool    `json:"primary"`
+	Default      bool    `json:"default"`
 	CurrentState string  `json:"current_state"`
 }
 

@@ -1,3 +1,8 @@
+## 0.1.8
+
+#### Enhancements
+* Added support for Postgres 17
+
 ## 0.1.7
 
 #### Enhancements
