@@ -21,6 +21,7 @@ func TestAccBranchResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
 					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-patient-mode-718259"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+					resource.TestCheckResourceAttr("neon_branch.test", "protected", "false"),
 					resource.TestCheckNoResourceAttr("neon_branch.test", "endpoint"),
 				),
 			},
@@ -39,6 +40,7 @@ func TestAccBranchResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
 					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-patient-mode-718259"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+					resource.TestCheckResourceAttr("neon_branch.test", "protected", "false"),
 					resource.TestCheckNoResourceAttr("neon_branch.test", "endpoint"),
 				),
 			},
@@ -50,6 +52,7 @@ func TestAccBranchResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "nue-analytics"),
 					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-patient-mode-718259"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+					resource.TestCheckResourceAttr("neon_branch.test", "protected", "true"),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.min_cu", "1"),
@@ -73,6 +76,7 @@ func TestAccBranchResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "nue-analytics"),
 					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-patient-mode-718259"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+					resource.TestCheckResourceAttr("neon_branch.test", "protected", "false"),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.min_cu", "0.25"),
@@ -106,6 +110,7 @@ func TestAccBranchResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
 					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-proud-heart-a5e356v0"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+					resource.TestCheckResourceAttr("neon_branch.test", "protected", "true"),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.min_cu", "1"),
@@ -129,6 +134,7 @@ func TestAccBranchResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
 					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-proud-heart-a5e356v0"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+					resource.TestCheckResourceAttr("neon_branch.test", "protected", "true"),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.min_cu", "1"),
@@ -152,6 +158,7 @@ func TestAccBranchResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "nue-analytics"),
 					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-proud-heart-a5e356v0"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+					resource.TestCheckResourceAttr("neon_branch.test", "protected", "false"),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_branch.test", "endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_branch.test", "endpoint.min_cu", "0.25"),
@@ -168,6 +175,7 @@ func TestAccBranchResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_branch.test", "name", "analytics"),
 					resource.TestCheckResourceAttr("neon_branch.test", "parent_id", "br-proud-heart-a5e356v0"),
 					resource.TestCheckResourceAttr("neon_branch.test", "project_id", "polished-snowflake-328957"),
+					resource.TestCheckResourceAttr("neon_branch.test", "protected", "false"),
 					resource.TestCheckNoResourceAttr("neon_branch.test", "endpoint"),
 				),
 			},
@@ -186,7 +194,7 @@ func TestAccBranchResourceNonDefault(t *testing.T) {
 func testAccBranchResourceConfigDefault(name string) string {
 	return fmt.Sprintf(`
 resource "neon_branch" "test" {
-  name = "%s"
+  name       = "%s"
   project_id = "polished-snowflake-328957"
 }
 `, name)
@@ -195,8 +203,8 @@ resource "neon_branch" "test" {
 func testAccBranchResourceConfigDefaultParent(name string) string {
 	return fmt.Sprintf(`
 resource "neon_branch" "test" {
-  name = "%s"
-  parent_id = "br-proud-heart-a5e356v0"
+  name       = "%s"
+  parent_id  = "br-proud-heart-a5e356v0"
   project_id = "polished-snowflake-328957"
 }
 `, name)
@@ -205,8 +213,8 @@ resource "neon_branch" "test" {
 func testAccBranchResourceConfigEndpointDefault(name string, parentId string) string {
 	return fmt.Sprintf(`
 resource "neon_branch" "test" {
-  name = "%s"
-  parent_id = "%s"
+  name       = "%s"
+  parent_id  = "%s"
   project_id = "polished-snowflake-328957"
 
   endpoint = {}
@@ -217,13 +225,14 @@ resource "neon_branch" "test" {
 func testAccBranchResourceConfigNonDefault(name string, parentId string) string {
 	return fmt.Sprintf(`
 resource "neon_branch" "test" {
-  name = "%s"
-  parent_id = "%s"
+  name       = "%s"
+  parent_id  = "%s"
   project_id = "polished-snowflake-328957"
+  protected  = true
 
   endpoint = {
-    min_cu = 1
-    max_cu = 2
+    min_cu         = 1
+    max_cu         = 2
     suspend_timeout = 3600
   }
 }

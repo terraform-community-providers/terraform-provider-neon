@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
@@ -56,14 +57,16 @@ var branchEndpointAttrTypes = map[string]attr.Type{
 }
 
 type ProjectResourceBranchModel struct {
-	Id       types.String `tfsdk:"id"`
-	Name     types.String `tfsdk:"name"`
-	Endpoint types.Object `tfsdk:"endpoint"`
+	Id        types.String `tfsdk:"id"`
+	Name      types.String `tfsdk:"name"`
+	Protected types.Bool   `tfsdk:"protected"`
+	Endpoint  types.Object `tfsdk:"endpoint"`
 }
 
 var branchAttrTypes = map[string]attr.Type{
-	"id":   types.StringType,
-	"name": types.StringType,
+	"id":        types.StringType,
+	"name":      types.StringType,
+	"protected": types.BoolType,
 	"endpoint": types.ObjectType{
 		AttrTypes: branchEndpointAttrTypes,
 	},
@@ -146,8 +149,9 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 					types.ObjectValueMust(
 						branchAttrTypes,
 						map[string]attr.Value{
-							"id":   types.StringUnknown(),
-							"name": types.StringValue("main"),
+							"id":        types.StringUnknown(),
+							"name":      types.StringValue("main"),
+							"protected": types.BoolValue(false),
 							"endpoint": types.ObjectValueMust(
 								branchEndpointAttrTypes,
 								map[string]attr.Value{
@@ -178,6 +182,12 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 						Validators: []validator.String{
 							stringvalidator.UTF8LengthAtLeast(1),
 						},
+					},
+					"protected": schema.BoolAttribute{
+						MarkdownDescription: "Whether the branch is protected. **Default** `false`.",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(false),
 					},
 					"endpoint": schema.SingleNestedAttribute{
 						MarkdownDescription: "Read-write compute endpoint settings of the branch.",
@@ -327,6 +337,24 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 
 	tflog.Trace(ctx, "created a project")
 
+	// Update the branch
+	if branchData.Protected.ValueBool() {
+		branch, err := branchUpdate(r.client, project.Project.Id, project.Branch.Id, BranchUpdateInput{
+			Branch: BranchUpdateInputBranch{
+				Protected: branchData.Protected.ValueBoolPointer(),
+			},
+		})
+
+		if err != nil {
+			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update branch, got error: %s", err))
+			return
+		}
+
+		tflog.Trace(ctx, "updated branch protected")
+
+		project.Branch = branch.Branch
+	}
+
 	// Delete the default database.
 	err = databaseDelete(r.client, project.Project.Id, project.Branch.Id, project.Databases[0].Name)
 
@@ -356,8 +384,9 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
 		map[string]attr.Value{
-			"id":   types.StringValue(project.Branch.Id),
-			"name": types.StringValue(project.Branch.Name),
+			"id":        types.StringValue(project.Branch.Id),
+			"name":      types.StringValue(project.Branch.Name),
+			"protected": types.BoolValue(project.Branch.Protected),
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
@@ -422,8 +451,9 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
 		map[string]attr.Value{
-			"id":   types.StringValue(branch.Id),
-			"name": types.StringValue(branch.Name),
+			"id":        types.StringValue(branch.Id),
+			"name":      types.StringValue(branch.Name),
+			"protected": types.BoolValue(branch.Protected),
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{
@@ -495,14 +525,20 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		Name: branchState.Name.ValueString(),
 	}
 
+	branchInput := BranchUpdateInput{
+		Branch: BranchUpdateInputBranch{},
+	}
+
 	// Need to do this check because we can't update the branch with the same name
 	if branchData.Name.ValueString() != branchState.Name.ValueString() {
-		branchInput := BranchUpdateInput{
-			Branch: BranchUpdateInputBranch{
-				Name: branchData.Name.ValueString(),
-			},
-		}
+		branchInput.Branch.Name = branchData.Name.ValueStringPointer()
+	}
 
+	if branchData.Protected.ValueBool() != branchState.Protected.ValueBool() {
+		branchInput.Branch.Protected = branchData.Protected.ValueBoolPointer()
+	}
+
+	if branchInput.Branch.Name != nil || branchInput.Branch.Protected != nil {
 		branchOutput, err := branchUpdate(r.client, data.Id.ValueString(), branchData.Id.ValueString(), branchInput)
 
 		if err != nil {
@@ -551,8 +587,9 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
 		map[string]attr.Value{
-			"id":   types.StringValue(branch.Id),
-			"name": types.StringValue(branch.Name),
+			"id":        types.StringValue(branch.Id),
+			"name":      types.StringValue(branch.Name),
+			"protected": types.BoolValue(branch.Protected),
 			"endpoint": types.ObjectValueMust(
 				branchEndpointAttrTypes,
 				map[string]attr.Value{

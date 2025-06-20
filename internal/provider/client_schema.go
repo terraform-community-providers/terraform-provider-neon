@@ -16,6 +16,7 @@ type Branch struct {
 	ParentId     *string `json:"parent_id"`
 	Name         string  `json:"name"`
 	Default      bool    `json:"default"`
+	Protected    bool    `json:"protected"`
 	CurrentState string  `json:"current_state"`
 }
 
@@ -109,8 +110,9 @@ type BranchOutput struct {
 }
 
 type BranchCreateInputBranch struct {
-	Name     string `json:"name"`
-	ParentId string `json:"parent_id,omitempty"`
+	Name      string `json:"name"`
+	ParentId  string `json:"parent_id,omitempty"`
+	Protected *bool  `json:"protected,omitempty"`
 }
 
 type BranchCreateInput struct {
@@ -118,7 +120,8 @@ type BranchCreateInput struct {
 }
 
 type BranchUpdateInputBranch struct {
-	Name string `json:"name"`
+	Name      *string `json:"name,omitempty"`
+	Protected *bool   `json:"protected,omitempty"`
 }
 
 type BranchUpdateInput struct {

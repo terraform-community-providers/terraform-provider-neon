@@ -1,3 +1,8 @@
+## 0.1.9
+
+#### Enhancements
+* Allow setting `protected` in `neon_branch` and `neon_project.branch`
+
 ## 0.1.8
 
 #### Enhancements

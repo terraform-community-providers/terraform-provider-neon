@@ -45,6 +45,7 @@ Optional:
 
 - `endpoint` (Attributes) Read-write compute endpoint settings of the branch. (see [below for nested schema](#nestedatt--branch--endpoint))
 - `name` (String) Name of the branch.
+- `protected` (Boolean) Whether the branch is protected. **Default** `false`.
 
 Read-Only:
 
