@@ -66,7 +66,7 @@ func (r *BranchResource) Metadata(ctx context.Context, req resource.MetadataRequ
 
 func (r *BranchResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: "Neon branch. Please use `neon_project` to create primary branch.",
+		MarkdownDescription: "Neon branch. Please use `neon_project` to create default branch.",
 		Attributes: map[string]schema.Attribute{
 			"id": schema.StringAttribute{
 				MarkdownDescription: "ID of the branch.",
@@ -83,7 +83,7 @@ func (r *BranchResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				},
 			},
 			"parent_id": schema.StringAttribute{
-				MarkdownDescription: "ID of the parent branch. Defaults to the primary branch.",
+				MarkdownDescription: "ID of the parent branch. Defaults to the default branch.",
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{

@@ -139,7 +139,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 				},
 			},
 			"branch": schema.SingleNestedAttribute{
-				MarkdownDescription: "Primary branch settings of the project.",
+				MarkdownDescription: "Default branch settings of the project.",
 				Optional:            true,
 				Computed:            true,
 				Default: objectdefault.StaticValue(
@@ -393,19 +393,19 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
-	// Get the primary branch for the project
-	branch, err := readPrimaryBranch(r.client, project.Project.Id)
+	// Get the default branch for the project
+	branch, err := readDefaultBranch(r.client, project.Project.Id)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read primary branch of the project, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read default branch of the project, got error: %s", err))
 		return
 	}
 
-	// Get the endpoint for the primary branch
+	// Get the endpoint for the default branch
 	endpoint, err := branchEndpoint(r.client, project.Project.Id, branch.Id, true)
 
 	if err != nil {
-		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read endpoint of the primary branch, got error: %s", err))
+		resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read endpoint of the default branch, got error: %s", err))
 		return
 	}
 
@@ -593,7 +593,7 @@ func (r *ProjectResource) ImportState(ctx context.Context, req resource.ImportSt
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
 
-func readPrimaryBranch(client *http.Client, projectId string) (Branch, error) {
+func readDefaultBranch(client *http.Client, projectId string) (Branch, error) {
 	var branch Branch
 
 	// Read all branches
@@ -603,9 +603,9 @@ func readPrimaryBranch(client *http.Client, projectId string) (Branch, error) {
 		return branch, err
 	}
 
-	// Get the primary branch
+	// Get the default branch
 	branchIdx := slices.IndexFunc(branches.Branches, func(branch Branch) bool {
-		return branch.Primary
+		return branch.Default
 	})
 
 	return branches.Branches[branchIdx], nil

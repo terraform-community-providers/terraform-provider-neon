@@ -3,12 +3,12 @@
 page_title: "neon_branch Resource - terraform-provider-neon"
 subcategory: ""
 description: |-
-  Neon branch. Please use neon_project to create primary branch.
+  Neon branch. Please use neon_project to create default branch.
 ---
 
 # neon_branch (Resource)
 
-Neon branch. Please use `neon_project` to create primary branch.
+Neon branch. Please use `neon_project` to create default branch.
 
 ## Example Usage
 
@@ -31,7 +31,7 @@ resource "neon_branch" "example" {
 ### Optional
 
 - `endpoint` (Attributes) Read-write compute endpoint settings of the branch. (see [below for nested schema](#nestedatt--endpoint))
-- `parent_id` (String) ID of the parent branch. Defaults to the primary branch.
+- `parent_id` (String) ID of the parent branch. Defaults to the default branch.
 
 ### Read-Only
 
