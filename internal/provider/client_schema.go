@@ -20,9 +20,10 @@ type Branch struct {
 }
 
 type Role struct {
-	Name     string `json:"name"`
-	Password string `json:"password"`
-	BranchId string `json:"branch_id"`
+	Name      string `json:"name"`
+	Password  string `json:"password"`
+	BranchId  string `json:"branch_id"`
+	Protected bool   `json:"protected"`
 }
 
 type Database struct {

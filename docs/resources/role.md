@@ -33,6 +33,7 @@ resource "neon_role" "example" {
 
 - `id` (String) Identifier of the role.
 - `password` (String, Sensitive) Password of the role.
+- `protected` (Boolean) Whether the role is protected.
 
 ## Import
 
