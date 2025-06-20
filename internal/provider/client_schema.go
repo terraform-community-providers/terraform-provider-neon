@@ -199,3 +199,15 @@ type DatabaseUpdateInputDatabase struct {
 type DatabaseUpdateInput struct {
 	Database DatabaseUpdateInputDatabase `json:"database"`
 }
+
+type ConnectionURIInput struct {
+	BranchId     *string
+	EndpointId   *string
+	DatabaseName string
+	RoleName     string
+	Pooled       bool
+}
+
+type ConnectionURIOutput struct {
+	URI string `json:"uri"`
+}

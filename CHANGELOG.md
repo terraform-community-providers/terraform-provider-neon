@@ -2,6 +2,7 @@
 
 #### Enhancements
 * Allow setting `protected` in `neon_branch` and `neon_project.branch`
+* Added `neon_connection_uri` datasource
 
 ## 0.1.8
 
