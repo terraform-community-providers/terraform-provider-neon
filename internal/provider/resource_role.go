@@ -34,6 +34,7 @@ type RoleResourceModel struct {
 	Password  types.String `tfsdk:"password"`
 	BranchId  types.String `tfsdk:"branch_id"`
 	ProjectId types.String `tfsdk:"project_id"`
+	Protected types.Bool   `tfsdk:"protected"`
 }
 
 func (r *RoleResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -85,6 +86,10 @@ func (r *RoleResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(idRegex(), "must be an id"),
 				},
+			},
+			"protected": schema.BoolAttribute{
+				MarkdownDescription: "Whether the role is protected.",
+				Computed:            true,
 			},
 		},
 	}
@@ -146,6 +151,7 @@ func (r *RoleResource) Create(ctx context.Context, req resource.CreateRequest, r
 	data.Password = types.StringValue(role.Role.Password)
 	data.BranchId = types.StringValue(role.Role.BranchId)
 	data.ProjectId = types.StringValue(branch.Branch.ProjectId)
+	data.Protected = types.BoolValue(role.Role.Protected)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
@@ -192,6 +198,7 @@ func (r *RoleResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	data.Password = types.StringValue(rolePassword.Password)
 	data.BranchId = types.StringValue(role.Role.BranchId)
 	data.ProjectId = types.StringValue(branch.Branch.ProjectId)
+	data.Protected = types.BoolValue(role.Role.Protected)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }

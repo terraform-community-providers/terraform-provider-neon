@@ -25,6 +25,7 @@ func TestAccRoleResourceDefault(t *testing.T) {
 					resource.TestMatchResourceAttr("neon_role.test", "password", existRegex()),
 					resource.TestCheckResourceAttr("neon_role.test", "branch_id", "br-patient-mode-718259"),
 					resource.TestCheckResourceAttr("neon_role.test", "project_id", "polished-snowflake-328957"),
+					resource.TestCheckResourceAttr("neon_role.test", "protected", "false"),
 				),
 			},
 			// ImportState testing
@@ -42,6 +43,7 @@ func TestAccRoleResourceDefault(t *testing.T) {
 					resource.TestMatchResourceAttr("neon_role.test", "password", existRegex()),
 					resource.TestCheckResourceAttr("neon_role.test", "branch_id", "br-patient-mode-718259"),
 					resource.TestCheckResourceAttr("neon_role.test", "project_id", "polished-snowflake-328957"),
+					resource.TestCheckResourceAttr("neon_role.test", "protected", "false"),
 				),
 			},
 			// ImportState testing
