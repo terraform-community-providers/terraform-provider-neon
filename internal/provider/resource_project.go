@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -45,6 +46,16 @@ type ProjectResourceBranchEndpointModel struct {
 	MaxCu              types.Float64 `tfsdk:"max_cu"`
 	ComputeProvisioner types.String  `tfsdk:"compute_provisioner"`
 	SuspendTimeout     types.Int64   `tfsdk:"suspend_timeout"`
+}
+
+var allowedIpsAttrTypes = map[string]attr.Type{
+	"ips":                     types.ListType{ElemType: types.StringType},
+	"protected_branches_only": types.BoolType,
+}
+
+type ProjectResourceAllowedIpsModel struct {
+	Ips                   types.List `tfsdk:"ips"`
+	ProtectedBranchesOnly types.Bool `tfsdk:"protected_branches_only"`
 }
 
 var branchEndpointAttrTypes = map[string]attr.Type{
@@ -81,6 +92,7 @@ type ProjectResourceModel struct {
 	PgVersion        types.Int64  `tfsdk:"pg_version"`
 	HistoryRetention types.Int64  `tfsdk:"history_retention"`
 	Branch           types.Object `tfsdk:"branch"`
+	AllowedIps       types.Object `tfsdk:"allowed_ips"`
 }
 
 func (r *ProjectResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -149,6 +161,35 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 				Default:             int64default.StaticInt64(86400),
 				Validators: []validator.Int64{
 					int64validator.Between(0, 2592000),
+				},
+			},
+			"allowed_ips": schema.SingleNestedAttribute{
+				MarkdownDescription: "Allowed IP restriction settings for the project endpoints.",
+				Optional:            true,
+				Computed:            true,
+				Default: objectdefault.StaticValue(
+					types.ObjectValueMust(
+						allowedIpsAttrTypes,
+						map[string]attr.Value{
+							"ips":                     types.ListValueMust(types.StringType, []attr.Value{}),
+							"protected_branches_only": types.BoolValue(false),
+						},
+					),
+				),
+				Attributes: map[string]schema.Attribute{
+					"ips": schema.ListAttribute{
+						MarkdownDescription: "List of IP addresses allowed to connect to the project endpoints.",
+						Optional:            true,
+						Computed:            true,
+						ElementType:         types.StringType,
+						Default:             listdefault.StaticValue(types.ListValueMust(types.StringType, []attr.Value{})),
+					},
+					"protected_branches_only": schema.BoolAttribute{
+						MarkdownDescription: "Whether restriction applies only to protected branches. **Default** `false`.",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(false),
+					},
 				},
 			},
 			"branch": schema.SingleNestedAttribute{
@@ -295,6 +336,7 @@ func (r *ProjectResource) Configure(ctx context.Context, req resource.ConfigureR
 
 func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data *ProjectResourceModel
+	var allowedIpsData *ProjectResourceAllowedIpsModel
 	var branchData *ProjectResourceBranchModel
 	var branchEndpointData *ProjectResourceBranchEndpointModel
 
@@ -335,6 +377,27 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 		AutoscalingLimitMinCu: branchEndpointData.MinCu.ValueFloat64(),
 		AutoscalingLimitMaxCu: branchEndpointData.MaxCu.ValueFloat64(),
 		SuspendTimeoutSeconds: branchEndpointData.SuspendTimeout.ValueInt64(),
+	}
+
+	resp.Diagnostics.Append(data.AllowedIps.As(ctx, &allowedIpsData, basetypes.ObjectAsOptions{})...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var ips []string
+
+	resp.Diagnostics.Append(allowedIpsData.Ips.ElementsAs(ctx, &ips, false)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	input.Project.Settings = ProjectSettings{
+		AllowedIps: ProjectSettingsAllowedIps{
+			Ips:                   ips,
+			ProtectedBranchesOnly: allowedIpsData.ProtectedBranchesOnly.ValueBool(),
+		},
 	}
 
 	var project ProjectCreateOutput
@@ -392,6 +455,20 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 	if project.Project.OrgId != "" {
 		data.OrgId = types.StringValue(project.Project.OrgId)
 	}
+
+	var allowed []attr.Value
+
+	for _, ip := range project.Project.Settings.AllowedIps.Ips {
+		allowed = append(allowed, types.StringValue(ip))
+	}
+
+	data.AllowedIps = types.ObjectValueMust(
+		allowedIpsAttrTypes,
+		map[string]attr.Value{
+			"ips":                     types.ListValueMust(types.StringType, allowed),
+			"protected_branches_only": types.BoolValue(project.Project.Settings.AllowedIps.ProtectedBranchesOnly),
+		},
+	)
 
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
@@ -461,6 +538,20 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		data.OrgId = types.StringValue(project.Project.OrgId)
 	}
 
+	var allowed []attr.Value
+
+	for _, ip := range project.Project.Settings.AllowedIps.Ips {
+		allowed = append(allowed, types.StringValue(ip))
+	}
+
+	data.AllowedIps = types.ObjectValueMust(
+		allowedIpsAttrTypes,
+		map[string]attr.Value{
+			"ips":                     types.ListValueMust(types.StringType, allowed),
+			"protected_branches_only": types.BoolValue(project.Project.Settings.AllowedIps.ProtectedBranchesOnly),
+		},
+	)
+
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
 		map[string]attr.Value{
@@ -486,6 +577,7 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 
 func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data *ProjectResourceModel
+	var allowedIpsData *ProjectResourceAllowedIpsModel
 	var branchData *ProjectResourceBranchModel
 	var branchEndpointData *ProjectResourceBranchEndpointModel
 
@@ -504,10 +596,30 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	resp.Diagnostics.Append(data.AllowedIps.As(ctx, &allowedIpsData, basetypes.ObjectAsOptions{})...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var ips []string
+
+	resp.Diagnostics.Append(allowedIpsData.Ips.ElementsAs(ctx, &ips, false)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	input := ProjectUpdateInput{
 		Project: ProjectUpdateInputProject{
 			Name:                    data.Name.ValueString(),
 			HistoryRetentionSeconds: data.HistoryRetention.ValueInt64(),
+			Settings: ProjectSettings{
+				AllowedIps: ProjectSettingsAllowedIps{
+					Ips:                   ips,
+					ProtectedBranchesOnly: allowedIpsData.ProtectedBranchesOnly.ValueBool(),
+				},
+			},
 		},
 	}
 
@@ -598,6 +710,20 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 	if project.Project.OrgId != "" {
 		data.OrgId = types.StringValue(project.Project.OrgId)
 	}
+
+	var allowed []attr.Value
+
+	for _, ip := range project.Project.Settings.AllowedIps.Ips {
+		allowed = append(allowed, types.StringValue(ip))
+	}
+
+	data.AllowedIps = types.ObjectValueMust(
+		allowedIpsAttrTypes,
+		map[string]attr.Value{
+			"ips":                     types.ListValueMust(types.StringType, allowed),
+			"protected_branches_only": types.BoolValue(project.Project.Settings.AllowedIps.ProtectedBranchesOnly),
+		},
+	)
 
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,

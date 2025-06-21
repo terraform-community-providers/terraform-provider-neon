@@ -16,6 +16,11 @@ Neon project.
 resource "neon_project" "example" {
   name      = "something"
   region_id = "aws-us-west-2"
+
+  allowed_ips {
+    ips                     = ["192.168.1.1", "10.0.0.0/24"]
+    protected_branches_only = true
+  }
 }
 ```
 
@@ -29,6 +34,7 @@ resource "neon_project" "example" {
 
 ### Optional
 
+- `allowed_ips` (Attributes) Allowed IP restriction settings for the project endpoints. (see [below for nested schema](#nestedatt--allowed_ips))
 - `branch` (Attributes) Default branch settings of the project. (see [below for nested schema](#nestedatt--branch))
 - `history_retention` (Number) PITR history retention period of the project in seconds. **Default** `86400` (1 day).
 - `org_id` (String) Organization of the project.
@@ -38,6 +44,15 @@ resource "neon_project" "example" {
 
 - `id` (String) Identifier of the project.
 - `platform_id` (String) Platform of the project.
+
+<a id="nestedatt--allowed_ips"></a>
+### Nested Schema for `allowed_ips`
+
+Optional:
+
+- `ips` (List of String) List of IP addresses allowed to connect to the project endpoints.
+- `protected_branches_only` (Boolean) Whether restriction applies only to protected branches. **Default** `false`.
+
 
 <a id="nestedatt--branch"></a>
 ### Nested Schema for `branch`
