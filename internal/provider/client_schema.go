@@ -1,14 +1,15 @@
 package provider
 
 type Project struct {
-	Id                      string `json:"id"`
-	Name                    string `json:"name"`
-	PlatformId              string `json:"platform_id"`
-	RegionId                string `json:"region_id"`
-	OrgId                   string `json:"org_id,omitempty"`
-	PgVersion               int64  `json:"pg_version"`
-	StorePasswords          bool   `json:"store_passwords"`
-	HistoryRetentionSeconds int64  `json:"history_retention_seconds"`
+	Id                      string          `json:"id"`
+	Name                    string          `json:"name"`
+	PlatformId              string          `json:"platform_id"`
+	RegionId                string          `json:"region_id"`
+	OrgId                   string          `json:"org_id,omitempty"`
+	PgVersion               int64           `json:"pg_version"`
+	StorePasswords          bool            `json:"store_passwords"`
+	HistoryRetentionSeconds int64           `json:"history_retention_seconds"`
+	Settings                ProjectSettings `json:"settings"`
 }
 
 type Branch struct {
@@ -81,6 +82,7 @@ type ProjectCreateInputProject struct {
 	HistoryRetentionSeconds int64                                            `json:"history_retention_seconds"`
 	Branch                  ProjectCreateInputProjectBranch                  `json:"branch"`
 	DefaultEndpointSettings ProjectCreateInputProjectDefaultEndpointSettings `json:"default_endpoint_settings"`
+	Settings                ProjectSettings                                  `json:"settings"`
 }
 
 type ProjectCreateInput struct {
@@ -95,9 +97,19 @@ type ProjectCreateOutput struct {
 	Endpoints []Endpoint `json:"endpoints"`
 }
 
+type ProjectSettings struct {
+	AllowedIps ProjectSettingsAllowedIps `json:"allowed_ips"`
+}
+
+type ProjectSettingsAllowedIps struct {
+	Ips                   []string `json:"ips"`
+	ProtectedBranchesOnly bool     `json:"protected_branches_only"`
+}
+
 type ProjectUpdateInputProject struct {
-	Name                    string `json:"name"`
-	HistoryRetentionSeconds int64  `json:"history_retention_seconds"`
+	Name                    string          `json:"name"`
+	HistoryRetentionSeconds int64           `json:"history_retention_seconds"`
+	Settings                ProjectSettings `json:"settings"`
 }
 
 type ProjectUpdateInput struct {
