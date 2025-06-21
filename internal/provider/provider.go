@@ -100,7 +100,9 @@ func (p *NeonProvider) Resources(ctx context.Context) []func() resource.Resource
 }
 
 func (p *NeonProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		NewConnectionURIDataSource,
+	}
 }
 
 func New(version string) func() provider.Provider {

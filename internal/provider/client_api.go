@@ -3,6 +3,8 @@ package provider
 import (
 	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 
 	"golang.org/x/exp/slices"
@@ -226,4 +228,30 @@ func roleDelete(client *http.Client, projectId string, branchId string, name str
 	_, err = delete(client, fmt.Sprintf("/projects/%s/branches/%s/roles/%s", projectId, branchId, name))
 
 	return err
+}
+
+func connectionURI(
+	client *http.Client,
+	projectId string,
+	input ConnectionURIInput,
+) (ConnectionURIOutput, error) {
+	var result ConnectionURIOutput
+
+	values := url.Values{}
+
+	if input.BranchId != nil {
+		values.Add("branch_id", *input.BranchId)
+	}
+
+	if input.EndpointId != nil {
+		values.Add("endpoint_id", *input.EndpointId)
+	}
+
+	values.Add("database_name", input.DatabaseName)
+	values.Add("role_name", input.RoleName)
+	values.Add("pooled", strconv.FormatBool(input.Pooled))
+
+	err := get(client, fmt.Sprintf("/projects/%s/connection_uri?%s", projectId, values.Encode()), &result)
+
+	return result, err
 }
