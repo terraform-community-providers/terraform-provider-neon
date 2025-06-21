@@ -31,6 +31,32 @@ import (
 var _ resource.Resource = &ProjectResource{}
 var _ resource.ResourceWithImportState = &ProjectResource{}
 
+func logicalReplication() planmodifier.Bool {
+	return logicalReplicationModifier{}
+}
+
+type logicalReplicationModifier struct{}
+
+func (m logicalReplicationModifier) Description(ctx context.Context) string {
+	return m.MarkdownDescription(ctx)
+}
+
+func (m logicalReplicationModifier) MarkdownDescription(_ context.Context) string {
+	return "Once set to `true`, it cannot be switched off."
+}
+
+func (m logicalReplicationModifier) PlanModifyBool(_ context.Context, req planmodifier.BoolRequest, resp *planmodifier.BoolResponse) {
+	// If the state value is true, we cannot change it to false.
+	if req.StateValue.ValueBool() {
+		resp.PlanValue = req.StateValue
+		return
+	}
+
+	if req.PlanValue.IsUnknown() || req.PlanValue.IsNull() {
+		resp.PlanValue = types.BoolValue(false)
+	}
+}
+
 func NewProjectResource() resource.Resource {
 	return &ProjectResource{}
 }
@@ -84,15 +110,16 @@ var branchAttrTypes = map[string]attr.Type{
 }
 
 type ProjectResourceModel struct {
-	Id               types.String `tfsdk:"id"`
-	Name             types.String `tfsdk:"name"`
-	PlatformId       types.String `tfsdk:"platform_id"`
-	RegionId         types.String `tfsdk:"region_id"`
-	OrgId            types.String `tfsdk:"org_id"`
-	PgVersion        types.Int64  `tfsdk:"pg_version"`
-	HistoryRetention types.Int64  `tfsdk:"history_retention"`
-	Branch           types.Object `tfsdk:"branch"`
-	AllowedIps       types.Object `tfsdk:"allowed_ips"`
+	Id                 types.String `tfsdk:"id"`
+	Name               types.String `tfsdk:"name"`
+	PlatformId         types.String `tfsdk:"platform_id"`
+	RegionId           types.String `tfsdk:"region_id"`
+	OrgId              types.String `tfsdk:"org_id"`
+	PgVersion          types.Int64  `tfsdk:"pg_version"`
+	HistoryRetention   types.Int64  `tfsdk:"history_retention"`
+	Branch             types.Object `tfsdk:"branch"`
+	AllowedIps         types.Object `tfsdk:"allowed_ips"`
+	LogicalReplication types.Bool   `tfsdk:"logical_replication"`
 }
 
 func (r *ProjectResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -190,6 +217,14 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 						Computed:            true,
 						Default:             booldefault.StaticBool(false),
 					},
+				},
+			},
+			"logical_replication": schema.BoolAttribute{
+				MarkdownDescription: "Whether logical replication is enabled for the project endpoints. Cannot be switched off once turned on. **Default** `false`.",
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Bool{
+					logicalReplication(),
 				},
 			},
 			"branch": schema.SingleNestedAttribute{
@@ -398,6 +433,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 			Ips:                   ips,
 			ProtectedBranchesOnly: allowedIpsData.ProtectedBranchesOnly.ValueBool(),
 		},
+		EnableLogicalReplication: data.LogicalReplication.ValueBool(),
 	}
 
 	var project ProjectCreateOutput
@@ -469,6 +505,8 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 			"protected_branches_only": types.BoolValue(project.Project.Settings.AllowedIps.ProtectedBranchesOnly),
 		},
 	)
+
+	data.LogicalReplication = types.BoolValue(project.Project.Settings.EnableLogicalReplication)
 
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
@@ -552,6 +590,8 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		},
 	)
 
+	data.LogicalReplication = types.BoolValue(project.Project.Settings.EnableLogicalReplication)
+
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
 		map[string]attr.Value{
@@ -619,6 +659,7 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 					Ips:                   ips,
 					ProtectedBranchesOnly: allowedIpsData.ProtectedBranchesOnly.ValueBool(),
 				},
+				EnableLogicalReplication: data.LogicalReplication.ValueBool(),
 			},
 		},
 	}
