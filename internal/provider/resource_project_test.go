@@ -28,6 +28,7 @@ func TestAccProjectResourceDefaultForUser(t *testing.T) {
 					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
+					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "false"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.#", "0"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.protected_branches_only", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
@@ -58,6 +59,7 @@ func TestAccProjectResourceDefaultForUser(t *testing.T) {
 					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
+					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "false"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.#", "0"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.protected_branches_only", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
@@ -82,6 +84,7 @@ func TestAccProjectResourceDefaultForUser(t *testing.T) {
 					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
+					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "false"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.#", "0"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.protected_branches_only", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
@@ -122,6 +125,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
+					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "false"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.#", "0"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.protected_branches_only", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
@@ -152,6 +156,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
+					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "false"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.#", "0"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.protected_branches_only", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
@@ -176,6 +181,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
+					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "false"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.#", "0"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.protected_branches_only", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
@@ -200,6 +206,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "604800"),
+					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "true"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.#", "2"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.0", "112.0.0.1"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.1", "122.0.0.1"),
@@ -232,6 +239,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
+					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "true"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.#", "0"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.protected_branches_only", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
@@ -266,6 +274,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "604800"),
+					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "true"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.#", "2"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.0", "112.0.0.1"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.1", "122.0.0.1"),
@@ -298,6 +307,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "604800"),
+					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "true"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.#", "2"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.0", "112.0.0.1"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.1", "122.0.0.1"),
@@ -324,6 +334,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
+					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "true"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.ips.#", "0"),
 					resource.TestCheckResourceAttr("neon_project.test", "allowed_ips.protected_branches_only", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
@@ -375,6 +386,8 @@ resource "neon_project" "test" {
   history_retention  = 604800
   org_id             = "org-aged-sky-67916740"
 
+  logical_replication = true
+
   allowed_ips = {
     ips = ["112.0.0.1", "122.0.0.1"]
     protected_branches_only = true
@@ -403,6 +416,8 @@ resource "neon_project" "test" {
   org_id             = "org-aged-sky-67916740"
 
   pg_version = 14
+
+  logical_replication = true
 
   allowed_ips = {
     ips = ["112.0.0.1", "122.0.0.1"]
