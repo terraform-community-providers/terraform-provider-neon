@@ -29,6 +29,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
@@ -55,6 +56,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
@@ -75,6 +77,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
@@ -95,6 +98,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "master"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "true"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "1"),
@@ -108,6 +112,27 @@ func TestAccProjectResourceDefault(t *testing.T) {
 				ResourceName:      "neon_project.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+			// Update with null values so that it can be deleted
+			{
+				Config: testAccProjectResourceConfigDefault("nue-todo-app"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestMatchResourceAttr("neon_project.test", "id", idRegex()),
+					resource.TestCheckResourceAttr("neon_project.test", "name", "nue-todo-app"),
+					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
+					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
+					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
+					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
+					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "false"),
+					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.id", idRegex()),
+					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.max_cu", "0.25"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.compute_provisioner", "k8s-neonvm"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.suspend_timeout", "0"),
+				),
 			},
 			// Delete testing automatically occurs in TestCase
 		},
@@ -131,6 +156,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "master"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "true"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "1"),
@@ -157,6 +183,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "master"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "true"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "1"),
@@ -177,6 +204,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
+					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "false"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.id", idRegex()),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.endpoint.host", hostRegex("us-east-2")),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.endpoint.min_cu", "0.25"),
@@ -208,15 +236,16 @@ resource "neon_project" "test" {
 func testAccProjectResourceConfigDefaultUpdate(name string) string {
 	return fmt.Sprintf(`
 resource "neon_project" "test" {
-  name = "%s"
+  name      = "%s"
   region_id = "aws-us-east-2"
 
   branch = {
-    name = "master"
+    name      = "master"
+    protected = true
 
     endpoint = {
-      min_cu = 1
-      max_cu = 2
+      min_cu         = 1
+      max_cu         = 2
       suspend_timeout = 3600
     }
   }
@@ -227,18 +256,19 @@ resource "neon_project" "test" {
 func testAccProjectResourceConfigNonDefault(name string) string {
 	return fmt.Sprintf(`
 resource "neon_project" "test" {
-  name = "%s"
+  name      = "%s"
   region_id = "aws-us-east-2"
-  org_id = "org-aged-sky-67916740"
+  org_id    = "org-aged-sky-67916740"
 
   pg_version = 14
 
   branch = {
-    name = "master"
+    name      = "master"
+    protected = true
 
     endpoint = {
-      min_cu = 1
-      max_cu = 2
+      min_cu         = 1
+      max_cu         = 2
       suspend_timeout = 3600
     }
   }

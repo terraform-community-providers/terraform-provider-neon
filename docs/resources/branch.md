@@ -32,6 +32,7 @@ resource "neon_branch" "example" {
 
 - `endpoint` (Attributes) Read-write compute endpoint settings of the branch. (see [below for nested schema](#nestedatt--endpoint))
 - `parent_id` (String) ID of the parent branch. Defaults to the default branch.
+- `protected` (Boolean) Whether the branch is protected. **Default** `false`.
 
 ### Read-Only
 

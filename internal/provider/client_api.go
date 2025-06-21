@@ -91,7 +91,13 @@ func branchCreate(client *http.Client, projectId string, input BranchCreateInput
 func branchUpdate(client *http.Client, projectId string, branchId string, input BranchUpdateInput) (BranchOutput, error) {
 	var branch BranchOutput
 
-	err := call(client, http.MethodPatch, fmt.Sprintf("/projects/%s/branches/%s", projectId, branchId), input, &branch)
+	err := projectWait(client, projectId)
+
+	if err != nil {
+		return branch, err
+	}
+
+	err = call(client, http.MethodPatch, fmt.Sprintf("/projects/%s/branches/%s", projectId, branchId), input, &branch)
 
 	return branch, err
 }

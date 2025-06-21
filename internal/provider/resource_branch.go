@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -57,6 +58,7 @@ type BranchResourceModel struct {
 	Name      types.String `tfsdk:"name"`
 	ParentId  types.String `tfsdk:"parent_id"`
 	ProjectId types.String `tfsdk:"project_id"`
+	Protected types.Bool   `tfsdk:"protected"`
 	Endpoint  types.Object `tfsdk:"endpoint"`
 }
 
@@ -102,6 +104,12 @@ func (r *BranchResource) Schema(ctx context.Context, req resource.SchemaRequest,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(idRegex(), "must be an id"),
 				},
+			},
+			"protected": schema.BoolAttribute{
+				MarkdownDescription: "Whether the branch is protected. **Default** `false`.",
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
 			},
 			"endpoint": schema.SingleNestedAttribute{
 				MarkdownDescription: "Read-write compute endpoint settings of the branch.",
@@ -189,7 +197,8 @@ func (r *BranchResource) Create(ctx context.Context, req resource.CreateRequest,
 
 	input := BranchCreateInput{
 		Branch: BranchCreateInputBranch{
-			Name: data.Name.ValueString(),
+			Name:      data.Name.ValueString(),
+			Protected: data.Protected.ValueBoolPointer(),
 		},
 	}
 
@@ -210,6 +219,7 @@ func (r *BranchResource) Create(ctx context.Context, req resource.CreateRequest,
 	data.Id = types.StringValue(branch.Branch.Id)
 	data.Name = types.StringValue(branch.Branch.Name)
 	data.ProjectId = types.StringValue(branch.Branch.ProjectId)
+	data.Protected = types.BoolValue(branch.Branch.Protected)
 
 	if branch.Branch.ParentId != nil {
 		data.ParentId = types.StringValue(*branch.Branch.ParentId)
@@ -292,6 +302,7 @@ func (r *BranchResource) Read(ctx context.Context, req resource.ReadRequest, res
 	data.Id = types.StringValue(branch.Branch.Id)
 	data.Name = types.StringValue(branch.Branch.Name)
 	data.ProjectId = types.StringValue(branch.Branch.ProjectId)
+	data.Protected = types.BoolValue(branch.Branch.Protected)
 
 	if branch.Branch.ParentId != nil {
 		data.ParentId = types.StringValue(*branch.Branch.ParentId)
@@ -339,15 +350,21 @@ func (r *BranchResource) Update(ctx context.Context, req resource.UpdateRequest,
 		ProjectId: state.ProjectId.ValueString(),
 	}
 
+	branchInput := BranchUpdateInput{
+		Branch: BranchUpdateInputBranch{},
+	}
+
 	// Need to do this check because we can't update the branch with the same name
 	if data.Name.ValueString() != state.Name.ValueString() {
-		input := BranchUpdateInput{
-			Branch: BranchUpdateInputBranch{
-				Name: data.Name.ValueString(),
-			},
-		}
+		branchInput.Branch.Name = data.Name.ValueStringPointer()
+	}
 
-		branchOutput, err := branchUpdate(r.client, data.ProjectId.ValueString(), data.Id.ValueString(), input)
+	if data.Protected.ValueBool() != state.Protected.ValueBool() {
+		branchInput.Branch.Protected = data.Protected.ValueBoolPointer()
+	}
+
+	if branchInput.Branch.Name != nil || branchInput.Branch.Protected != nil {
+		branchOutput, err := branchUpdate(r.client, data.ProjectId.ValueString(), data.Id.ValueString(), branchInput)
 
 		if err != nil {
 			resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to update branch, got error: %s", err))
@@ -362,6 +379,7 @@ func (r *BranchResource) Update(ctx context.Context, req resource.UpdateRequest,
 	data.Id = types.StringValue(branch.Id)
 	data.Name = types.StringValue(branch.Name)
 	data.ProjectId = types.StringValue(branch.ProjectId)
+	data.Protected = types.BoolValue(branch.Protected)
 
 	if branch.ParentId != nil {
 		data.ParentId = types.StringValue(*branch.ParentId)
