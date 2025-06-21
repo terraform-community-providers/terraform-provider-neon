@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/float64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
@@ -84,15 +85,16 @@ var branchAttrTypes = map[string]attr.Type{
 }
 
 type ProjectResourceModel struct {
-	Id               types.String `tfsdk:"id"`
-	Name             types.String `tfsdk:"name"`
-	PlatformId       types.String `tfsdk:"platform_id"`
-	RegionId         types.String `tfsdk:"region_id"`
-	OrgId            types.String `tfsdk:"org_id"`
-	PgVersion        types.Int64  `tfsdk:"pg_version"`
-	HistoryRetention types.Int64  `tfsdk:"history_retention"`
-	Branch           types.Object `tfsdk:"branch"`
-	AllowedIps       types.Object `tfsdk:"allowed_ips"`
+	Id                 types.String `tfsdk:"id"`
+	Name               types.String `tfsdk:"name"`
+	PlatformId         types.String `tfsdk:"platform_id"`
+	RegionId           types.String `tfsdk:"region_id"`
+	OrgId              types.String `tfsdk:"org_id"`
+	PgVersion          types.Int64  `tfsdk:"pg_version"`
+	HistoryRetention   types.Int64  `tfsdk:"history_retention"`
+	Branch             types.Object `tfsdk:"branch"`
+	AllowedIps         types.Object `tfsdk:"allowed_ips"`
+	LogicalReplication types.Bool   `tfsdk:"logical_replication"`
 }
 
 func (r *ProjectResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -190,6 +192,14 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 						Computed:            true,
 						Default:             booldefault.StaticBool(false),
 					},
+				},
+			},
+			"logical_replication": schema.BoolAttribute{
+				MarkdownDescription: "Whether logical replication is enabled for the project endpoints. Cannot be switched off once turned on. **Default** `false`.",
+				Optional:            true,
+				Computed:            true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.UseStateForUnknown(),
 				},
 			},
 			"branch": schema.SingleNestedAttribute{
@@ -398,6 +408,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 			Ips:                   ips,
 			ProtectedBranchesOnly: allowedIpsData.ProtectedBranchesOnly.ValueBool(),
 		},
+		LogicalReplication: data.LogicalReplication.ValueBool(),
 	}
 
 	var project ProjectCreateOutput
@@ -469,6 +480,8 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 			"protected_branches_only": types.BoolValue(project.Project.Settings.AllowedIps.ProtectedBranchesOnly),
 		},
 	)
+
+	data.LogicalReplication = types.BoolValue(project.Project.Settings.LogicalReplication)
 
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
@@ -552,6 +565,8 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 		},
 	)
 
+	data.LogicalReplication = types.BoolValue(project.Project.Settings.LogicalReplication)
+
 	data.Branch = types.ObjectValueMust(
 		branchAttrTypes,
 		map[string]attr.Value{
@@ -619,6 +634,7 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 					Ips:                   ips,
 					ProtectedBranchesOnly: allowedIpsData.ProtectedBranchesOnly.ValueBool(),
 				},
+				LogicalReplication: data.LogicalReplication.ValueBool(),
 			},
 		},
 	}

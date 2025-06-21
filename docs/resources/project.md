@@ -16,11 +16,6 @@ Neon project.
 resource "neon_project" "example" {
   name      = "something"
   region_id = "aws-us-west-2"
-
-  allowed_ips {
-    ips                     = ["192.168.1.1", "10.0.0.0/24"]
-    protected_branches_only = true
-  }
 }
 ```
 
@@ -37,6 +32,7 @@ resource "neon_project" "example" {
 - `allowed_ips` (Attributes) Allowed IP restriction settings for the project endpoints. (see [below for nested schema](#nestedatt--allowed_ips))
 - `branch` (Attributes) Default branch settings of the project. (see [below for nested schema](#nestedatt--branch))
 - `history_retention` (Number) PITR history retention period of the project in seconds. **Default** `86400` (1 day).
+- `logical_replication` (Boolean) Whether logical replication is enabled for the project endpoints. Cannot be switched off once turned on. **Default** `false`.
 - `org_id` (String) Organization of the project.
 - `pg_version` (Number) PostgreSQL version of the project. **Default** `15`.
 
