@@ -30,6 +30,7 @@ resource "neon_project" "example" {
 ### Optional
 
 - `branch` (Attributes) Default branch settings of the project. (see [below for nested schema](#nestedatt--branch))
+- `history_retention` (Number) PITR history retention period of the project in seconds. **Default** `86400` (1 day).
 - `org_id` (String) Organization of the project.
 - `pg_version` (Number) PostgreSQL version of the project. **Default** `15`.
 

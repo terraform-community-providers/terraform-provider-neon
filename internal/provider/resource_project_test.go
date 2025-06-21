@@ -27,6 +27,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
 					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
+					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "false"),
@@ -54,6 +55,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
 					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
+					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "false"),
@@ -75,6 +77,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
 					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
+					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "false"),
@@ -96,6 +99,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
 					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
+					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "604800"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "master"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "true"),
@@ -123,6 +127,7 @@ func TestAccProjectResourceDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
 					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
+					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "false"),
@@ -154,6 +159,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
 					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
+					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "604800"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "master"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "true"),
@@ -181,6 +187,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
 					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
+					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "604800"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "master"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "true"),
@@ -202,6 +209,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
 					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-aged-sky-67916740"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "14"),
+					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
 					resource.TestMatchResourceAttr("neon_project.test", "branch.id", idRegex()),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.name", "main"),
 					resource.TestCheckResourceAttr("neon_project.test", "branch.protected", "false"),
@@ -227,7 +235,7 @@ func TestAccProjectResourceNonDefault(t *testing.T) {
 func testAccProjectResourceConfigDefault(name string) string {
 	return fmt.Sprintf(`
 resource "neon_project" "test" {
-  name = "%s"
+  name      = "%s"
   region_id = "aws-us-east-2"
 }
 `, name)
@@ -236,8 +244,9 @@ resource "neon_project" "test" {
 func testAccProjectResourceConfigDefaultUpdate(name string) string {
 	return fmt.Sprintf(`
 resource "neon_project" "test" {
-  name      = "%s"
-  region_id = "aws-us-east-2"
+  name               = "%s"
+  region_id          = "aws-us-east-2"
+  history_retention  = 604800
 
   branch = {
     name      = "master"
@@ -256,9 +265,10 @@ resource "neon_project" "test" {
 func testAccProjectResourceConfigNonDefault(name string) string {
 	return fmt.Sprintf(`
 resource "neon_project" "test" {
-  name      = "%s"
-  region_id = "aws-us-east-2"
-  org_id    = "org-aged-sky-67916740"
+  name               = "%s"
+  region_id          = "aws-us-east-2"
+  history_retention  = 604800
+  org_id             = "org-aged-sky-67916740"
 
   pg_version = 14
 
