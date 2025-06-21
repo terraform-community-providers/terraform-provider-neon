@@ -98,7 +98,8 @@ type ProjectCreateOutput struct {
 }
 
 type ProjectSettings struct {
-	AllowedIps ProjectSettingsAllowedIps `json:"allowed_ips"`
+	AllowedIps               ProjectSettingsAllowedIps `json:"allowed_ips"`
+	EnableLogicalReplication bool                      `json:"enable_logical_replication"`
 }
 
 type ProjectSettingsAllowedIps struct {

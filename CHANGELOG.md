@@ -3,7 +3,7 @@
 #### Enhancements
 * Added `protected` in `neon_branch` and `neon_project.branch`
 * Added `neon_connection_uri` datasource
-* Added `history_retention` & `allowed_ips` in `neon_project`
+* Added `history_retention`, `logical_replication` & `allowed_ips` in `neon_project`
 
 ## 0.1.8
 
