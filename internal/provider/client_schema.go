@@ -1,13 +1,14 @@
 package provider
 
 type Project struct {
-	Id             string `json:"id"`
-	Name           string `json:"name"`
-	PlatformId     string `json:"platform_id"`
-	RegionId       string `json:"region_id"`
-	OrgId          string `json:"org_id,omitempty"`
-	PgVersion      int64  `json:"pg_version"`
-	StorePasswords bool   `json:"store_passwords"`
+	Id                      string `json:"id"`
+	Name                    string `json:"name"`
+	PlatformId              string `json:"platform_id"`
+	RegionId                string `json:"region_id"`
+	OrgId                   string `json:"org_id,omitempty"`
+	PgVersion               int64  `json:"pg_version"`
+	StorePasswords          bool   `json:"store_passwords"`
+	HistoryRetentionSeconds int64  `json:"history_retention_seconds"`
 }
 
 type Branch struct {
@@ -77,6 +78,7 @@ type ProjectCreateInputProject struct {
 	OrgId                   *string                                          `json:"org_id,omitempty"`
 	PgVersion               int64                                            `json:"pg_version"`
 	StorePasswords          bool                                             `json:"store_passwords"`
+	HistoryRetentionSeconds int64                                            `json:"history_retention_seconds"`
 	Branch                  ProjectCreateInputProjectBranch                  `json:"branch"`
 	DefaultEndpointSettings ProjectCreateInputProjectDefaultEndpointSettings `json:"default_endpoint_settings"`
 }
@@ -94,7 +96,8 @@ type ProjectCreateOutput struct {
 }
 
 type ProjectUpdateInputProject struct {
-	Name string `json:"name"`
+	Name                    string `json:"name"`
+	HistoryRetentionSeconds int64  `json:"history_retention_seconds"`
 }
 
 type ProjectUpdateInput struct {

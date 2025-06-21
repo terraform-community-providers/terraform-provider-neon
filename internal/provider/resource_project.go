@@ -73,13 +73,14 @@ var branchAttrTypes = map[string]attr.Type{
 }
 
 type ProjectResourceModel struct {
-	Id         types.String `tfsdk:"id"`
-	Name       types.String `tfsdk:"name"`
-	PlatformId types.String `tfsdk:"platform_id"`
-	RegionId   types.String `tfsdk:"region_id"`
-	OrgId      types.String `tfsdk:"org_id"`
-	PgVersion  types.Int64  `tfsdk:"pg_version"`
-	Branch     types.Object `tfsdk:"branch"`
+	Id               types.String `tfsdk:"id"`
+	Name             types.String `tfsdk:"name"`
+	PlatformId       types.String `tfsdk:"platform_id"`
+	RegionId         types.String `tfsdk:"region_id"`
+	OrgId            types.String `tfsdk:"org_id"`
+	PgVersion        types.Int64  `tfsdk:"pg_version"`
+	HistoryRetention types.Int64  `tfsdk:"history_retention"`
+	Branch           types.Object `tfsdk:"branch"`
 }
 
 func (r *ProjectResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -139,6 +140,15 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 				},
 				Validators: []validator.Int64{
 					int64validator.OneOf(14, 15, 16, 17),
+				},
+			},
+			"history_retention": schema.Int64Attribute{
+				MarkdownDescription: "PITR history retention period of the project in seconds. **Default** `86400` (1 day).",
+				Optional:            true,
+				Computed:            true,
+				Default:             int64default.StaticInt64(86400),
+				Validators: []validator.Int64{
+					int64validator.Between(0, 2592000),
 				},
 			},
 			"branch": schema.SingleNestedAttribute{
@@ -296,11 +306,12 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 
 	input := ProjectCreateInput{
 		Project: ProjectCreateInputProject{
-			Name:           data.Name.ValueString(),
-			RegionId:       data.RegionId.ValueString(),
-			OrgId:          data.OrgId.ValueStringPointer(),
-			PgVersion:      data.PgVersion.ValueInt64(),
-			StorePasswords: true,
+			Name:                    data.Name.ValueString(),
+			RegionId:                data.RegionId.ValueString(),
+			OrgId:                   data.OrgId.ValueStringPointer(),
+			PgVersion:               data.PgVersion.ValueInt64(),
+			StorePasswords:          true,
+			HistoryRetentionSeconds: data.HistoryRetention.ValueInt64(),
 		},
 	}
 
@@ -376,6 +387,7 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 	data.PlatformId = types.StringValue(project.Project.PlatformId)
 	data.RegionId = types.StringValue(project.Project.RegionId)
 	data.PgVersion = types.Int64Value(project.Project.PgVersion)
+	data.HistoryRetention = types.Int64Value(project.Project.HistoryRetentionSeconds)
 
 	if project.Project.OrgId != "" {
 		data.OrgId = types.StringValue(project.Project.OrgId)
@@ -443,6 +455,7 @@ func (r *ProjectResource) Read(ctx context.Context, req resource.ReadRequest, re
 	data.PlatformId = types.StringValue(project.Project.PlatformId)
 	data.RegionId = types.StringValue(project.Project.RegionId)
 	data.PgVersion = types.Int64Value(project.Project.PgVersion)
+	data.HistoryRetention = types.Int64Value(project.Project.HistoryRetentionSeconds)
 
 	if project.Project.OrgId != "" {
 		data.OrgId = types.StringValue(project.Project.OrgId)
@@ -493,7 +506,8 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 
 	input := ProjectUpdateInput{
 		Project: ProjectUpdateInputProject{
-			Name: data.Name.ValueString(),
+			Name:                    data.Name.ValueString(),
+			HistoryRetentionSeconds: data.HistoryRetention.ValueInt64(),
 		},
 	}
 
@@ -579,6 +593,7 @@ func (r *ProjectResource) Update(ctx context.Context, req resource.UpdateRequest
 	data.PlatformId = types.StringValue(project.Project.PlatformId)
 	data.RegionId = types.StringValue(project.Project.RegionId)
 	data.PgVersion = types.Int64Value(project.Project.PgVersion)
+	data.HistoryRetention = types.Int64Value(project.Project.HistoryRetentionSeconds)
 
 	if project.Project.OrgId != "" {
 		data.OrgId = types.StringValue(project.Project.OrgId)
