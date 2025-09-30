@@ -178,7 +178,7 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 					int64planmodifier.RequiresReplace(),
 				},
 				Validators: []validator.Int64{
-					int64validator.OneOf(14, 15, 16, 17),
+					int64validator.OneOf(14, 15, 16, 17, 18),
 				},
 			},
 			"history_retention": schema.Int64Attribute{

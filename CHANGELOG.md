@@ -1,3 +1,8 @@
+## 0.1.10
+
+#### Enhancements
+* Added support for Postgres 18
+
 ## 0.1.9
 
 #### Enhancements
