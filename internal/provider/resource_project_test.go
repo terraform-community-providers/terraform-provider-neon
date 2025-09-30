@@ -9,7 +9,7 @@ import (
 )
 
 func hostRegex(region string) *regexp.Regexp {
-	return regexp.MustCompile("^[-0-9a-z]+\\." + region + "\\.aws\\.neon\\.tech$")
+	return regexp.MustCompile("^[-0-9a-z\\.]+\\." + region + "\\.aws\\.neon\\.tech$")
 }
 
 func TestAccProjectResourceDefaultForUser(t *testing.T) {
@@ -25,7 +25,7 @@ func TestAccProjectResourceDefaultForUser(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "name", "todo-app"),
 					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
-					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
+					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-blue-haze-97971912"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
 					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "false"),
@@ -56,7 +56,7 @@ func TestAccProjectResourceDefaultForUser(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "name", "todo-app"),
 					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
-					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
+					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-blue-haze-97971912"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
 					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "false"),
@@ -81,7 +81,7 @@ func TestAccProjectResourceDefaultForUser(t *testing.T) {
 					resource.TestCheckResourceAttr("neon_project.test", "name", "nu-todo-app"),
 					resource.TestCheckResourceAttr("neon_project.test", "platform_id", "aws"),
 					resource.TestCheckResourceAttr("neon_project.test", "region_id", "aws-us-east-2"),
-					resource.TestCheckNoResourceAttr("neon_project.test", "org_id"),
+					resource.TestCheckResourceAttr("neon_project.test", "org_id", "org-blue-haze-97971912"),
 					resource.TestCheckResourceAttr("neon_project.test", "pg_version", "15"),
 					resource.TestCheckResourceAttr("neon_project.test", "history_retention", "86400"),
 					resource.TestCheckResourceAttr("neon_project.test", "logical_replication", "false"),
