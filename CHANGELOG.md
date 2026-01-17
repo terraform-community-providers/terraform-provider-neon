@@ -1,4 +1,4 @@
-## 0.1.11
+## 0.1.12
 
 #### Enhancements
 * Added support for larger compute sizes

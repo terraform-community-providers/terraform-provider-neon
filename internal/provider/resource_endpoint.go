@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/float64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -103,7 +102,7 @@ func (r *EndpointResource) Schema(ctx context.Context, req resource.SchemaReques
 				Computed:            true,
 				Default:             float64default.StaticFloat64(0.25),
 				Validators: []validator.Float64{
-					float64validator.OneOf(0.25, 0.5, 1, 2, 3, 4, 5, 6, 7),
+					ComputeSizeValidator,
 				},
 			},
 			"max_cu": schema.Float64Attribute{
@@ -112,7 +111,7 @@ func (r *EndpointResource) Schema(ctx context.Context, req resource.SchemaReques
 				Computed:            true,
 				Default:             float64default.StaticFloat64(0.25),
 				Validators: []validator.Float64{
-					float64validator.OneOf(0.25, 0.5, 1, 2, 3, 4, 5, 6, 7),
+					ComputeSizeValidator,
 				},
 			},
 			"compute_provisioner": schema.StringAttribute{
