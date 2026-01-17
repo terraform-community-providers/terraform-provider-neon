@@ -24,6 +24,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
+var ComputeSizeValidator = float64validator.OneOf(0.25, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 52, 54, 56)
+
 var _ resource.Resource = &BranchResource{}
 var _ resource.ResourceWithImportState = &BranchResource{}
 
@@ -135,7 +137,7 @@ func (r *BranchResource) Schema(ctx context.Context, req resource.SchemaRequest,
 						Computed:            true,
 						Default:             float64default.StaticFloat64(0.25),
 						Validators: []validator.Float64{
-							float64validator.OneOf(0.25, 0.5, 1, 2, 3, 4, 5, 6, 7),
+							ComputeSizeValidator,
 						},
 					},
 					"max_cu": schema.Float64Attribute{
@@ -144,7 +146,7 @@ func (r *BranchResource) Schema(ctx context.Context, req resource.SchemaRequest,
 						Computed:            true,
 						Default:             float64default.StaticFloat64(0.25),
 						Validators: []validator.Float64{
-							float64validator.OneOf(0.25, 0.5, 1, 2, 3, 4, 5, 6, 7),
+							ComputeSizeValidator,
 						},
 					},
 					"compute_provisioner": schema.StringAttribute{
