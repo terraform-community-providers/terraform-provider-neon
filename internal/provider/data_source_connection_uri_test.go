@@ -19,13 +19,13 @@ func TestAccConnectionURIDataSource(t *testing.T) {
 					resource.TestMatchResourceAttr(
 						"data.neon_connection_uri.test", "uri",
 						regexp.MustCompile(
-							`^postgresql://budget-app:[^@]*@ep-summer-hill-233691\.us-east-2\.aws\.neon\.tech/budget-app\?sslmode=require$`,
+							`^postgresql://budget-app:[^@]*@ep-summer-hill-233691\.us-east-2\.aws\.neon\.tech/budget-app\?channel_binding=require&sslmode=require$`,
 						),
 					),
 					resource.TestMatchResourceAttr(
 						"data.neon_connection_uri.test", "pooled_uri",
 						regexp.MustCompile(
-							`^postgresql://budget-app:[^@]*@ep-summer-hill-233691-pooler\.us-east-2\.aws\.neon\.tech/budget-app\?sslmode=require$`,
+							`^postgresql://budget-app:[^@]*@ep-summer-hill-233691-pooler\.us-east-2\.aws\.neon\.tech/budget-app\?channel_binding=require&sslmode=require$`,
 						),
 					),
 				),
@@ -37,13 +37,13 @@ func TestAccConnectionURIDataSource(t *testing.T) {
 					resource.TestMatchResourceAttr(
 						"data.neon_connection_uri.test", "uri",
 						regexp.MustCompile(
-							`^postgresql://budget-app:[^@]*@ep-weathered-truth-a5451m4z\.us-east-2\.aws\.neon\.tech/budget-app\?sslmode=require$`,
+							`^postgresql://budget-app:[^@]*@ep-weathered-truth-a5451m4z\.us-east-2\.aws\.neon\.tech/budget-app\?channel_binding=require&sslmode=require$`,
 						),
 					),
 					resource.TestMatchResourceAttr(
 						"data.neon_connection_uri.test", "pooled_uri",
 						regexp.MustCompile(
-							`^postgresql://budget-app:[^@]*@ep-weathered-truth-a5451m4z-pooler\.us-east-2\.aws\.neon\.tech/budget-app\?sslmode=require$`,
+							`^postgresql://budget-app:[^@]*@ep-weathered-truth-a5451m4z-pooler\.us-east-2\.aws\.neon\.tech/budget-app\?channel_binding=require&sslmode=require$`,
 						),
 					),
 				),
@@ -55,13 +55,13 @@ func TestAccConnectionURIDataSource(t *testing.T) {
 					resource.TestMatchResourceAttr(
 						"data.neon_connection_uri.test", "uri",
 						regexp.MustCompile(
-							`^postgresql://budget-app:[^@]*@ep-purple-sun-a58l9gwh\.us-east-2\.aws\.neon\.tech/budget-app\?sslmode=require$`,
+							`^postgresql://budget-app:[^@]*@ep-purple-sun-a58l9gwh\.us-east-2\.aws\.neon\.tech/budget-app\?channel_binding=require&sslmode=require$`,
 						),
 					),
 					resource.TestMatchResourceAttr(
 						"data.neon_connection_uri.test", "pooled_uri",
 						regexp.MustCompile(
-							`^postgresql://budget-app:[^@]*@ep-purple-sun-a58l9gwh-pooler\.us-east-2\.aws\.neon\.tech/budget-app\?sslmode=require$`,
+							`^postgresql://budget-app:[^@]*@ep-purple-sun-a58l9gwh-pooler\.us-east-2\.aws\.neon\.tech/budget-app\?channel_binding=require&sslmode=require$`,
 						),
 					),
 				),
