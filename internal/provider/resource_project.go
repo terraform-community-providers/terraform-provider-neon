@@ -163,8 +163,10 @@ func (r *ProjectResource) Schema(ctx context.Context, req resource.SchemaRequest
 			},
 			"org_id": schema.StringAttribute{
 				MarkdownDescription: "Organization of the project.",
+				Computed:            true,
 				Optional:            true,
 				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
@@ -384,11 +386,14 @@ func (r *ProjectResource) Create(ctx context.Context, req resource.CreateRequest
 		Project: ProjectCreateInputProject{
 			Name:                    data.Name.ValueString(),
 			RegionId:                data.RegionId.ValueString(),
-			OrgId:                   data.OrgId.ValueStringPointer(),
 			PgVersion:               data.PgVersion.ValueInt64(),
 			StorePasswords:          true,
 			HistoryRetentionSeconds: data.HistoryRetention.ValueInt64(),
 		},
+	}
+
+	if !data.OrgId.IsUnknown() {
+		input.Project.OrgId = data.OrgId.ValueStringPointer()
 	}
 
 	resp.Diagnostics.Append(data.Branch.As(ctx, &branchData, basetypes.ObjectAsOptions{})...)
